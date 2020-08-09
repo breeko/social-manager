@@ -10,7 +10,7 @@ from typing import List
 def generate_tweet(word: str) -> str:
   url = f"https://thoughts.sushant-kumar.com/{quote(word)}"
   response = requests.get(url)
-  soup = BeautifulSoup(response.text, "lxml")
+  soup = BeautifulSoup(response.text, "html.parser")
   out = soup.blockquote.text.replace("\n","")[1:-1]
   return out
 

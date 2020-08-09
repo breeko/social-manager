@@ -25,7 +25,7 @@ def generate(request):
     if 'generate' in request.POST:
       keyword = form.data.get('keyword', '')
       suggestions = [generate_tweet(keyword) for _ in range(NUM_SUGGESTIONS)]
-    if 'trend' in request.POST:
+    elif 'trend' in request.POST:
       trend = request.POST['trend']
       print(trend)
       form = GenerateTweetForm(initial={'keyword': trend})
