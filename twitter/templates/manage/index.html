@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="action">Action</th>
+        <th scope="username">Username</th>
+        <th scope="body">Body</th>
+        <th scope="scheduled">Scheduled</th>
+        <th scope="sent">Sent</th>
+      </tr>
+    </thead>
+  {% for tweet in tweets %}
+    <tr>
+      <td style="display: contents;">
+        <span>
+        <a class="btn btn-warning btn-sm" href="{% url 'twitter:edit_tweet' tweet.id %}">
+          ✏️
+        </a>
+        <a class="btn btn-danger btn-sm" href="{% url 'twitter:delete_tweet' tweet.id%}">
+          🗑️
+        </a>
+      </span>
+      </td>
+      <td>{{tweet.user_id.username}}</td>
+      <td>{{tweet.body}}</td>
+      <td>{{tweet.scheduled}}</td>
+      <td>{{tweet.sent}}</td>
+    </tr>
+  {% endfor %}
+  </table>
+{% endblock %}
+

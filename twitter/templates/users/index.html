@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <h3>Current Users</h3>
+    {% for u in users %}
+      <p>{{u}}</p>
+    {% endfor %}
+  <hr class="solid">
+  <h3>Create</h3>
+  <form action="{% url 'twitter:users' %}" method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">Create</button>
+    {{ error }}
+  </form>
+{% endblock %}
