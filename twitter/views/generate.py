@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from ..models import Tweet, User
 from django.template import loader
 from django import forms
-from bootstrap_datepicker_plus import DatePickerInput
 from ..utils.twitter_utils import generate_tweet, get_trends
 from django.utils import timezone
 from datetime import datetime
