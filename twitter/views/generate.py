@@ -3,8 +3,7 @@ from django.http import HttpResponse
 from ..models import Tweet, User
 from django.template import loader
 from django import forms
-from ..utils.twitter_utils import generate_tweet, get_trends
-from django.utils import timezone
+from ..utils.twitter_utils import generate_tweet, get_trends, MODEL_CHOICES
 from datetime import datetime
 
 def generate(request):
@@ -23,13 +22,14 @@ def generate(request):
   elif (request.method == "POST"):
     form = GenerateTweetForm(request.POST)
     if 'generate' in request.POST:
-      keyword = form.data.get('keyword', '')
-      suggestions = [generate_tweet(keyword) for _ in range(NUM_SUGGESTIONS)]
-    elif 'trend' in request.POST:
+      phrase = form.data.get('phrase', '')
+      model = form.data.get('model')
+      suggestions = [generate_tweet(phrase, model) for _ in range(NUM_SUGGESTIONS)]
+    if 'trend' in request.POST:
       trend = request.POST['trend']
-      print(trend)
-      form = GenerateTweetForm(initial={'keyword': trend})
-      suggestions = [generate_tweet(trend) for _ in range(NUM_SUGGESTIONS)]
+      model = form.data.get('model')
+      form = GenerateTweetForm(initial={'phrase': trend})
+      suggestions = [generate_tweet(trend, model) for _ in range(NUM_SUGGESTIONS)]
     elif 'save' in request.POST:
       key = request.POST['save']
       checks = [k for k in request.POST.keys() if k.startswith('check')]
@@ -39,7 +39,7 @@ def generate(request):
         username = request.POST.get(f"user:{key}")
         user = User.objects.get(username=username)
         schedule = request.POST.get(f"schedule:{key}")
-        tweet = Tweet(user_id=user, body=body, scheduled=schedule)
+        tweet = Tweet(user=user, body=body, scheduled=schedule)
         tweet.save()
       suggestions = []
 
@@ -56,5 +56,9 @@ def generate(request):
   return HttpResponse(template.render(context, request))
 
 class GenerateTweetForm(forms.Form):
-  keyword = forms.CharField(label='keyword', max_length=100, required=False)
+  phrase = forms.CharField(label='phrase', max_length=100, required=False)
+  model = forms.CharField(
+    label='model',
+    widget=forms.Select(choices=MODEL_CHOICES)
+  )
 

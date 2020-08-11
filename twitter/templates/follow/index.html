@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load twitter_extras %}
+
+{{ form.media }}
+
+{% block content %}
+  <form action="{% url 'twitter:follow' %}" method="post">
+    {% csrf_token %}
+    <select name="username">
+      {% for u in usernames %}
+        <option value="{{u}}">{{u}}</option>
+      {% endfor %}
+    </select>
+
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary" name="suggest">Suggest</button>
+    {% if suggestions|length > 0 %}
+      <button type="submit" class="btn btn-success" name="save">Save</button>
+    {% endif %}
+    <hr/>
+    <h3>Suggestions</h3>
+    <table class="table" style="font-size: 8px;">
+      <!-- # created_at, 
+      # (followers_count, friends_count), 
+      # default_profile or defualt_profile_image
+      # description
+      # statuses_count, favourites_count, retweet_count -->
+      <tr>
+        <th>
+          Save
+        </th>
+        <th>
+          Name
+        </th>
+        <th>
+          Description
+        </th>
+        <th>
+          Created
+        </th>
+        <th>
+          Last
+        </th>
+        <th>
+          Followers
+        </th>
+        <th>
+          Friends
+        </th>
+        <th>
+          Defaults
+        </th>
+        <th>
+          # status
+        </th>
+        <th>
+          Follow
+        </th>
+        <th>
+          Unfollow
+        </th>
+      </tr>
+      {% for s in suggestions %}
+        <tr>
+          <td>
+            <input type="checkbox" name="to_save" value="{{s.screen_name}}">
+          </td>
+          <td>
+            {% with "https://twitter.com/"|addstr:s.screen_name as link %}
+              <a name="{{name}}" value="{{ s.screen_name }}" href="{{ link }}" target="_blank" rel=noopener>
+                {{ s.screen_name }}
+              </a>
+            {% endwith %}
+          </td>
+          <td>{{ s.description }}</td>
+          <td>
+            {% with s.created_at|month_year as date %}
+              {{ date }}
+            {% endwith %}
+          </td>
+          <td>
+            {% with s.status.created_at|month_year as date %}
+              {{ date }}
+            {% endwith %}
+          </td>
+          <td>{{ s.followers_count }}</td>
+          <td>{{ s.friends_count }}</td>
+          <td>
+            {% if s.default_profile or s.defualt_profile_image %}
+              true
+            {%else%}
+              false
+            {%endif%}
+          </td>
+          <td>{{ s.statuses_count }}</td>
+          <td>
+            {% with "follow:"|addstr:s.screen_name as name %}
+              <input name="{{name}}" value="{{now}}">
+            {% endwith %}
+          </td>
+          <td>
+            {% with "unfollow:"|addstr:s.screen_name as name %}
+              <input name="{{name}}" value="{{later}}">
+            {% endwith %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+    <hr/>
+  </form>
+{% endblock %}

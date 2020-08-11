@@ -8,16 +8,13 @@
 {% block content %}
   <form action="{% url 'twitter:generate' %}" method="post">
     {% csrf_token %}
-    <h3>Trends</h3>  
-    {% for t in trends %}
-      <button type="submit" class="btn btn-sm btn-outline-dark" name="trend" value="{{t}}">{{t}}</button>
-    {% endfor %}
     {{ form|crispy }}
     <button type="submit" class="btn btn-primary" name="generate">Generate</button>
     {% if suggestions|length > 0 %}
       <button type="submit" class="btn btn-success" name="save">Save</button>
     {% endif %}
-    <hr >
+    <hr/>
+    <h3>Suggestions</h3>
     <table class="table">
       <tr>
       <th>
@@ -42,7 +39,7 @@
           </td>
           <td>
             {% with "body:"|addstr:forloop.counter0 as name %}
-              <textarea rows="2" cols="60" name="{{name}}">{{s}}</textarea>
+              <textarea rows="4" cols="80" name="{{name}}">{{s}}</textarea>
             {% endwith %}
           </td>
           <td>
@@ -62,5 +59,10 @@
         </tr>
       {% endfor %}
     </table>
+    <hr/>
+    <h3>Trends</h3>
+    {% for t in trends %}
+      <button type="submit" class="btn btn-sm btn-outline-dark" name="trend" value="{{t}}">{{t}}</button>
+    {% endfor %}
   </form>
 {% endblock %}

@@ -41,15 +41,11 @@ class NewUserForm(forms.ModelForm):
     }
 
 def login_valid(form: NewUserForm) -> bool:
-  try:
-    api_key = form.data.get('api_key')
-    api_secret = form.data.get('api_secret')
-    api_access_token = form.data.get('api_access_token')
-    api_token_secret = form.data.get('api_token_secret')
-    auth = tweepy.OAuthHandler(api_key, api_secret)
-    auth.set_access_token(api_access_token, api_token_secret)
-    api = tweepy.API(auth)
-    api.me()
-    return True
-  except:
-      return False
+  api_key = form.data.get('api_key')
+  api_secret = form.data.get('api_secret')
+  api_access_token = form.data.get('api_access_token')
+  api_token_secret = form.data.get('api_token_secret')
+  auth = tweepy.OAuthHandler(api_key, api_secret)
+  auth.set_access_token(api_access_token, api_token_secret)
+  api = tweepy.API(auth)
+  return api.verify_credentials() != False

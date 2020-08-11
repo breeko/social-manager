@@ -33,14 +33,15 @@ Schedule tweets and automatically generate tweets. Multiple account support, jus
 - Create and schedule messages using Create tab
 - Generate and schdule messages using Generate tab
   - Generate allows you to see trends and give you suggested tweets based on a keyword
-- Manage message using Manage tab
+- Manage messages using Manage tab
+- Follow allows you to find, filter and follow users and optionally unfollow them after a period of time
 
 ### Customize
-- social/settings.py has two pertinent fields TWEET_SCHEDULE_OFFSET and TWEET_SCHEDULE_SLEEP
-  - TWEET_SCHEDULE_OFFSET is the seconds offset to run a job.
+- social/settings.py social-manager releated fields
+  - `TWEET_SCHEDULE_OFFSET` is the seconds offset to run a job.
     - e.g. 120 means a tweet can run +/- 120 seconds from schedule
-  - TWEET_SCHEDULE_SLEEP is the amount of time it sleeps before checking the database again (in seconds)
-
+  - `TWEET_SCHEDULE_SLEEP` is the amount of time it sleeps before checking the database again (in seconds)
+  - `TWEET_SHOW_OLD` is how many old tweets to show in manage view
 
 ### Platforms Supported
 - Twitter

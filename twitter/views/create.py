@@ -22,6 +22,6 @@ def create(request):
 class NewTweetForm(forms.ModelForm):
   class Meta:
     model = Tweet
-    fields = ('user_id', 'body', 'scheduled',) 
+    fields = ('user', 'body', 'scheduled',) 
   
   
