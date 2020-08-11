@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from social.settings import UNFOLLOW_DEFAULT_DAYS
 
 def follow(request):
-  NUM_SUGGESTIONS = 5
+  NUM_SUGGESTIONS = 50
 
   template = loader.get_template('follow/index.html')
   usernames = [u.username for u in User.objects.all()]
