@@ -21,7 +21,7 @@ class FollowSettings:
   """ Settings for follow.py """
 
   # number of days before unfollowing someone
-  UNFOLLOW_DEFAULT_DAYS = 5
+  UNFOLLOW_DEFAULT_DAYS = None
 
   # number of follow suggestions to generate
   NUM_FOLLOW_SUGGESTIONS = 50
