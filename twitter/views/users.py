@@ -1,35 +1,39 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from ..models import User
-from django.template import loader
-from django import forms
+""" users.py """
 import tweepy
+from django import forms
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.template import loader
+
+from ..models import User
 
 
 def users(request):
-    template = loader.get_template('users/index.html')
-    form = NewUserForm(request.POST)
-    
-    error = ''
-    if (request.method == "POST"):
-      if form.is_valid() and login_valid(form):
-        form.save(commit=True)
-        form = NewUserForm()
-      else:
-        error = 'Invalid credentials'
-    else:
+  """ view for twitter/users """
+  template = loader.get_template('users/index.html')
+  form = NewUserForm(request.POST)
+
+  error = ''
+  if request.method == "POST":
+    if form.is_valid() and login_valid(form):
+      form.save(commit=True)
       form = NewUserForm()
-    
-    usernames = [u.username for u in User.objects.all()]
-    context = {
-      'form': form,
-      'title': 'Users',
-      'users': usernames,
-      'error': error
-    }
-    return HttpResponse(template.render(context, request))
+    else:
+      error = 'Invalid credentials'
+  else:
+    form = NewUserForm()
+
+  usernames = [u.username for u in User.objects.all()]
+  context = {
+    'form': form,
+    'title': 'Users',
+    'users': usernames,
+    'error': error
+  }
+  return HttpResponse(template.render(context, request))
 
 class NewUserForm(forms.ModelForm):
+  """ Form to create a new user"""
   class Meta:
     model = User
     fields = ('username', 'api_key', 'api_secret', 'api_access_token', 'api_token_secret',)
@@ -41,6 +45,7 @@ class NewUserForm(forms.ModelForm):
     }
 
 def login_valid(form: NewUserForm) -> bool:
+  """ Checks whether user has valid login """
   api_key = form.data.get('api_key')
   api_secret = form.data.get('api_secret')
   api_access_token = form.data.get('api_access_token')
@@ -48,4 +53,5 @@ def login_valid(form: NewUserForm) -> bool:
   auth = tweepy.OAuthHandler(api_key, api_secret)
   auth.set_access_token(api_access_token, api_token_secret)
   api = tweepy.API(auth)
-  return api.verify_credentials() != False
+  valid = api.verify_credentials() != False
+  return valid

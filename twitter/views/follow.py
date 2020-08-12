@@ -1,16 +1,15 @@
+""" follow.py """
+from datetime import datetime, timedelta
+
 from django import forms
 from django.http import HttpResponse
 from django.template import loader
-from ..utils.twitter_utils import get_suggestions, create_valid_user
-from twitter.models import User, Follow
-from datetime import datetime, timedelta
-from twitter.settings import UNFOLLOW_DEFAULT_DAYS, LAST_TWEET_DAYS
-from django.forms.models import formset_factory
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout
-from django.forms.models import inlineformset_factory
-from crispy_forms.bootstrap import InlineField
-from twitter.settings import NUM_FOLLOW_SUGGESTIONS
+
+from twitter.models import Follow, User
+from twitter.settings import FollowSettings as Settings
+
+from ..utils.twitter_utils import create_valid_user, get_suggestions
+
 
 def follow(request):
   template = loader.get_template('follow/index.html')
@@ -19,7 +18,7 @@ def follow(request):
   follow_form = FollowTweetForm(initial=FollowTweetFormDefaults)
 
   suggestions = []
-  if (request.method == 'POST'):
+  if request.method == 'POST':
     username = request.POST.get('username')
     user = User.objects.get(username=username)
     follow_form = FollowTweetForm(request.POST)
@@ -33,7 +32,7 @@ def follow(request):
         followers_friend_ratio_max=follow_form.data.get('followers_friend_ratio_max'),
         last_tweet=follow_form.data.get('last_tweet'),
       )
-      suggestions = get_suggestions(user, valid_user, NUM_FOLLOW_SUGGESTIONS)
+      suggestions = get_suggestions(user, valid_user, Settings.NUM_FOLLOW_SUGGESTIONS)
     elif 'save' in request.POST:
       to_save = request.POST.getlist('to_save')
       for s in to_save:
@@ -42,10 +41,10 @@ def follow(request):
         follow_ = Follow(username=s, user=user, follow=to_follow, unfollow=to_unfollow)
         follow_.save()
 
-  user_names = [u.username for u in User.objects.all()]
-  now  = datetime.now()
+  now = datetime.now()
   follow_date = now
-  unfollow_date = None if UNFOLLOW_DEFAULT_DAYS is None else now + timedelta(days=UNFOLLOW_DEFAULT_DAYS)
+  unfollow_date = None if Settings.UNFOLLOW_DEFAULT_DAYS is None else \
+    now + timedelta(days=Settings.UNFOLLOW_DEFAULT_DAYS)
 
   context = {
     'follow_form': follow_form,
@@ -67,5 +66,6 @@ class FollowTweetForm(forms.Form):
   last_tweet = forms.DateField(label="Last tweet", required=False)
 
 FollowTweetFormDefaults = {
-  "last_tweet":   None if LAST_TWEET_DAYS is None else datetime.now() - timedelta(days=LAST_TWEET_DAYS)
+  "last_tweet":   None if Settings.LAST_TWEET_DAYS is None else \
+    datetime.now() - timedelta(days=Settings.LAST_TWEET_DAYS)
 }

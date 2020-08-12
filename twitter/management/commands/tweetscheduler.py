@@ -1,9 +1,15 @@
-from twitter.models import User, Tweet, Follow
-from time import sleep
-from django.utils import timezone
-from twitter.settings import TWEET_SCHEDULE_OFFSET, TWEET_SCHEDULE_SLEEP
-from django.core.management.base import BaseCommand, CommandError
+""" tweetscheduler.py """
+
 import logging
+from datetime import datetime, timedelta
+from time import sleep
+
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+from tweepy.error import TweepError
+
+from twitter.models import Follow, Tweet
+from twitter.settings import TweetSchedulerSettings as Settings
 from twitter.utils.twitter_utils import get_api
 
 logging.basicConfig(
@@ -15,59 +21,68 @@ logging.basicConfig(
 )
 
 def process_tweet(tweet: Tweet):
+  """ Processes user tweets """
   api = get_api(tweet.user)
   api.update_status(tweet.body)
   tweet.sent = timezone.now()
   tweet.save(update_fields=["sent"])
-  logging.info(f"[{tweet.user.username}]: {tweet.body}")
+  logging.info("[%s]: %s", tweet.user.username, tweet.body)
 
 def process_follow(follow: Follow):
+  """ Processes user follows """
   api = get_api(follow.user)
   api.create_friendship(follow.username)
   follow.followed = timezone.now()
   follow.save(update_fields=['followed'])
-  logging.info(f"[{follow.user.username}]: friended {follow.username}")
+  logging.info("[%s]: followed %s", follow.user.username, follow.username)
 
 def process_unfollow(follow: Follow):
+  """ Processes user unfollows """
   api = get_api(follow.user)
   api.destroy_friendship(follow.username)
   follow.unfollowed = timezone.now()
   follow.save(update_fields=['unfollowed'])
-  logging.info(f"[{follow.user.username}]: unfriended {follow.username}")
+  logging.info("[%s]: unfollowed %s", follow.user.username, follow.username)
 
 class Command(BaseCommand):
-  help = f"""
-    Runs tweet schedule. You can set settings in settings.py.
-
-    TWEET_SCHEDULE_OFFSET={TWEET_SCHEDULE_OFFSET}
-    TWEET_SCHEDULE_SLEEP={TWEET_SCHEDULE_SLEEP}
-  """
+  """ Runs tweet schedule """
+  help = """Runs tweet schedule. You can set settings in settings.py """
   def handle(self, *args, **options):
+    tweet_sleep_until = datetime.min
+    follow_sleep_until = datetime.min
     while True:
-      handle_tweet()
-      handle_follow()
-      sleep(TWEET_SCHEDULE_SLEEP)
-
+      now = datetime.now()
+      if now > tweet_sleep_until:
+        try:
+          handle_tweet()
+        except TweepError as err:
+          logging.error("Failure to tweet: %s", err)
+          tweet_sleep_until = now + timedelta(seconds=Settings.SLEEP_FAILURE)
+      if now > follow_sleep_until:
+        try:
+          handle_follow()
+        except TweepError as err:
+          logging.error("Failure to tweet: %s", err)
+          follow_sleep_until = now + timedelta(seconds=Settings.SLEEP_FAILURE)
+      sleep(Settings.SLEEP)
 
 def handle_tweet():
-  offset = timezone.timedelta(seconds=TWEET_SCHEDULE_OFFSET)
+  """ Handles user tweets """
+  offset = timezone.timedelta(seconds=Settings.SCHEDULE_PRECISION)
   now = timezone.now()
   start = now - offset
   end = now + offset
   tweets = Tweet.objects.filter(scheduled__gte=start, scheduled__lte=end, sent__isnull=True)
-  all_tweets = Tweet.objects.all()
   for tweet in tweets:
     process_tweet(tweet)
-      
 
 def handle_follow():
+  """ Handles user follows """
   now = timezone.now()
   follows = Follow.objects.filter(follow__lte=now, followed__isnull=True)
   unfollows = Follow.objects.filter(unfollow__lte=now, unfollowed__isnull=True)
-  for f in follows:
-    process_follow(f)
+  for follow in follows:
+    process_follow(follow)
 
-  for u in unfollows:
-    process_unfollow(u)
-  
-  
+  for unfollow in unfollows:
+    process_unfollow(unfollow)

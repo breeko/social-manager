@@ -1,13 +1,17 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from ..models import Tweet, User
-from django.template import loader
-from django import forms
+""" create.py """
 from datetime import datetime
 
+from django import forms
+from django.http import HttpResponse
+from django.template import loader
+
+from ..models import Tweet
+
+
 def create(request):
+  """ view for twitter/create """
   template = loader.get_template('create/index.html')
-  if (request.method == "POST"):
+  if request.method == "POST":
     form = NewTweetForm(request.POST)
     if form.is_valid():
       form.save(commit=True)
@@ -15,13 +19,12 @@ def create(request):
   
   context = {
     'form': form,
-    'title': 'Create'  
+    'title': 'Create'
   }
   return HttpResponse(template.render(context, request))
 
 class NewTweetForm(forms.ModelForm):
+  """ Form for creating a tweet"""
   class Meta:
     model = Tweet
-    fields = ('user', 'body', 'scheduled',) 
-  
-  
+    fields = ('user', 'body', 'scheduled',)

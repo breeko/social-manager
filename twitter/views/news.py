@@ -5,7 +5,7 @@ from django import forms
 from django.http import HttpResponse
 from django.template import loader
 
-from twitter.settings import NUM_GENERATE_SUGGESTIONS, DEFAULT_NEWS_SOURCES
+from twitter.settings import NewsSettings as Settings
 
 from ..models import Tweet, User
 from ..utils.news_utils import TOPIC_CHOICES, get_news
@@ -16,7 +16,7 @@ def news(request):
 
   if request.method == "GET":
     suggestions = []
-    form = GenerateNewsForm(initial={'sources': DEFAULT_NEWS_SOURCES, 'topic': 'tech'})
+    form = GenerateNewsForm(initial={'sources': Settings.DEFAULT_NEWS_SOURCES, 'topic': Settings.DEFAULT_TOPIC})
   elif request.method == "POST":
     form = GenerateNewsForm(request.POST)
     if 'generate' in request.POST:
@@ -49,4 +49,4 @@ def news(request):
 class GenerateNewsForm(forms.Form):
   """ Form to input news sources and topic topic """
   sources = forms.CharField(label='sources', max_length=100, required=True)
-  topic = forms.ChoiceField(choices=[(t,t) for t in TOPIC_CHOICES])
+  topic = forms.ChoiceField(choices=[(t, t) for t in TOPIC_CHOICES])

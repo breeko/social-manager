@@ -1,15 +1,18 @@
 """ generate.py """
-from django.shortcuts import render
-from django.http import HttpResponse
-from ..models import Tweet, User
-from django.template import loader
-from django import forms
-from ..utils.twitter_utils import generate_tweet, get_trends, MODEL_CHOICES
 from datetime import datetime
-from twitter.settings import NUM_GENERATE_SUGGESTIONS
+
+from django import forms
+from django.http import HttpResponse
+from django.template import loader
+
+from twitter.settings import GenerateSettings as Settings
+
+from ..models import Tweet, User
+from ..utils.twitter_utils import MODEL_CHOICES, generate_tweet, get_trends
+
 
 def generate(request):
-
+  """ view for twitter/generate """
   template = loader.get_template('generate/index.html')
   maybe_user = User.objects.first()
   if maybe_user:
@@ -25,12 +28,12 @@ def generate(request):
     if 'generate' in request.POST:
       phrase = form.data.get('phrase', '')
       model = form.data.get('model')
-      suggestions = [generate_tweet(phrase, model) for _ in range(NUM_GENERATE_SUGGESTIONS)]
+      suggestions = [generate_tweet(phrase, model) for _ in range(Settings.NUM_GENERATE_SUGGESTIONS)]
     elif 'trend' in request.POST:
       trend = request.POST['trend']
       model = form.data.get('model')
       form = GenerateTweetForm(initial={'phrase': trend})
-      suggestions = [generate_tweet(trend, model) for _ in range(NUM_GENERATE_SUGGESTIONS)]
+      suggestions = [generate_tweet(trend, model) for _ in range(Settings.NUM_GENERATE_SUGGESTIONS)]
     elif 'save' in request.POST:
       key = request.POST['save']
       checks = [k for k in request.POST.keys() if k.startswith('check')]
@@ -62,4 +65,3 @@ class GenerateTweetForm(forms.Form):
     label='model',
     widget=forms.Select(choices=MODEL_CHOICES)
   )
-
