@@ -1,14 +1,16 @@
+import json
+import re
+from datetime import datetime
+from random import shuffle
+from typing import Callable, List
+
 import requests
+import tweepy
 from bs4 import BeautifulSoup
 from requests.utils import quote
-import re
-import tweepy
-from twitter.models import User
 from tweepy.api import API
-from typing import List
-import json
-from typing import Callable, List
-from random import shuffle
+
+from twitter.models import User
 
 MODEL_CHOICES = (
   ('gpt2', 'gpt2'),
@@ -19,6 +21,7 @@ MODEL_CHOICES = (
 )
 
 def generate_tweet(phrase: str, model: str) -> str:
+  """ Generates a tweet based on a phrase and model """
   if model == "html":
     return generate_html(phrase)
   elif model.startswith('gpt2'):
@@ -27,7 +30,7 @@ def generate_tweet(phrase: str, model: str) -> str:
     return ''
 
 def generate_html(phrase: str):
-  url = f"https://thoughts.sushant-kumar.com/{quote(word)}"
+  url = f"https://thoughts.sushant-kumar.com/{quote(phrase)}"
   response = requests.get(url)
   soup = BeautifulSoup(response.text, "html.parser")
   out = soup.blockquote.text.replace("\n","")[1:-1]
@@ -69,7 +72,7 @@ def chunks(lst, n):
       yield lst[i:i + n]
 
 def get_suggestions(user: User, valid_user: Callable[[User], bool], max_suggestions: int) -> List[tweepy.models.User]:
-  """ Returns friend suggestions based on current friends 
+  """ Returns friend suggestions based on current friends
     Input:
       user [User]: user to get api login
       valid_user [User => bool]: function to filter valid users
@@ -96,17 +99,30 @@ def get_suggestions(user: User, valid_user: Callable[[User], bool], max_suggesti
 
 
 def create_valid_user(
-  followers_max: int,
-  followers_min: int,
-  friends_max: int,
-  friends_min: int,
-  followers_friend_ratio_min: float,
-  followers_friend_ratio_max = 1.5):
+  followers_max: str,
+  followers_min: str,
+  friends_max: str,
+  friends_min: str,
+  followers_friend_ratio_min: str,
+  followers_friend_ratio_max: str,
+  last_tweet: str
+):
   def valid_user(user: User):
-    return user.followers_count >= followers_min and \
-      user.followers_count <= followers_max and \
-      user.friends_count >= friends_min and \
-      user.friends_count <= friends_max and \
-      user.followers_count / user.friends_count >= followers_friend_ratio_min and \
-      user.followers_count / user.friends_count <= followers_friend_ratio_max
+    return \
+      (followers_min == '' or user.followers_count >= int(followers_min)) and \
+      (followers_max == '' or user.followers_count <= int(followers_max)) and \
+      (friends_min == '' or user.friends_count >= int(friends_min)) and \
+      (friends_max == '' or user.friends_count <= int(friends_max)) and \
+      (followers_friend_ratio_min == '' or user.followers_count / user.friends_count >= float(followers_friend_ratio_min)) and \
+      (followers_friend_ratio_max == '' or user.followers_count / user.friends_count <= float(followers_friend_ratio_max)) and \
+      (last_tweet == '' or get_last_tweet(user) >= parse_date(last_tweet))
   return valid_user
+
+def parse_date(d: str) -> datetime:
+  return datetime.strptime(d, "%Y-%m-%d")
+
+def get_last_tweet(user: User) -> datetime:
+  try:
+    return user.status.created_at
+  except:
+    return datetime.min

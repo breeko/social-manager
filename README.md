@@ -37,11 +37,24 @@ Schedule tweets and automatically generate tweets. Multiple account support, jus
 - Follow allows you to find, filter and follow users and optionally unfollow them after a period of time
 
 ### Customize
-- social/settings.py social-manager releated fields
-  - `TWEET_SCHEDULE_OFFSET` is the seconds offset to run a job.
-    - e.g. 120 means a tweet can run +/- 120 seconds from schedule
-  - `TWEET_SCHEDULE_SLEEP` is the amount of time it sleeps before checking the database again (in seconds)
-  - `TWEET_SHOW_OLD` is how many old tweets to show in manage view
+twitter/settings.py
+- `TWEET_SCHEDULE_OFFSET` = 120
+  - the seconds offset to run a job. e.g. 120 means a tweet can run +/- 120 seconds from schedule
+- `TWEET_SCHEDULE_SLEEP` = 5
+  - how long to sleep before checking new things to tweet
+- `TWEET_SHOW_OLD` = 5
+  - how many old sent tweets to show in manage
+- `UNFOLLOW_DEFAULT_DAYS` = None
+  - number of days before unfollowing someone
+  - NOTE: following and unfollowing users is against Twitter's TOS and will get you suspended
+- `NUM_FOLLOW_SUGGESTIONS` = 50
+  - number of people you want to recommend following
+- `NUM_GENERATE_SUGGESTIONS` = 2
+  - number of suggestions to generate
+- `LAST_TWEET_DAYS` = 7
+  - when finding users, filter on users that have tweeted in LAST_TWEET_DAYS days
+- `DEFAULT_NEWS_SOURCES` = "news.ycombinator.com, techcrunch.com, nytimes.com"
+  - the default news sources to search
 
 ### Platforms Supported
 - Twitter

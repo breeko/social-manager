@@ -1,3 +1,4 @@
+""" generate.py """
 from django.shortcuts import render
 from django.http import HttpResponse
 from ..models import Tweet, User
@@ -5,9 +6,9 @@ from django.template import loader
 from django import forms
 from ..utils.twitter_utils import generate_tweet, get_trends, MODEL_CHOICES
 from datetime import datetime
+from twitter.settings import NUM_GENERATE_SUGGESTIONS
 
 def generate(request):
-  NUM_SUGGESTIONS = 2
 
   template = loader.get_template('generate/index.html')
   maybe_user = User.objects.first()
@@ -24,12 +25,12 @@ def generate(request):
     if 'generate' in request.POST:
       phrase = form.data.get('phrase', '')
       model = form.data.get('model')
-      suggestions = [generate_tweet(phrase, model) for _ in range(NUM_SUGGESTIONS)]
-    if 'trend' in request.POST:
+      suggestions = [generate_tweet(phrase, model) for _ in range(NUM_GENERATE_SUGGESTIONS)]
+    elif 'trend' in request.POST:
       trend = request.POST['trend']
       model = form.data.get('model')
       form = GenerateTweetForm(initial={'phrase': trend})
-      suggestions = [generate_tweet(trend, model) for _ in range(NUM_SUGGESTIONS)]
+      suggestions = [generate_tweet(trend, model) for _ in range(NUM_GENERATE_SUGGESTIONS)]
     elif 'save' in request.POST:
       key = request.POST['save']
       checks = [k for k in request.POST.keys() if k.startswith('check')]

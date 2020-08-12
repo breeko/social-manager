@@ -4,7 +4,7 @@ from ..models import Tweet, User
 from django.template import loader
 from django import forms
 from django.urls import reverse
-from social.settings import TWEET_SHOW_OLD
+from twitter.settings import TWEET_SHOW_OLD
 
 def manage(request):
     template = loader.get_template('manage/index.html')

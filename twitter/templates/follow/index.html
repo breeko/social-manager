@@ -1,20 +1,42 @@
 {% extends 'base.html' %}
 
 {% load crispy_forms_tags %}
+
 {% load twitter_extras %}
 
-{{ form.media }}
+{{ follow_form.media }}
 
 {% block content %}
-  <form action="{% url 'twitter:follow' %}" method="post">
+  <form class="form-horizontal" action="{% url 'twitter:follow' %}" method="post">
     {% csrf_token %}
     <select name="username">
       {% for u in usernames %}
         <option value="{{u}}">{{u}}</option>
       {% endfor %}
     </select>
-
-    {{ form|crispy }}
+    <div class="row" style="font-size: 10px;">
+      <div class="col-2">
+        {{ follow_form.followers_min|as_crispy_field }}
+      </div>
+      <div class="col-2">
+        {{ follow_form.followers_max|as_crispy_field }}
+      </div>
+      <div class="col-2">
+        {{ follow_form.friends_min|as_crispy_field }}
+      </div>
+      <div class="col-2">
+        {{ follow_form.friends_max|as_crispy_field }}
+      </div>
+      <div class="col-2">
+        {{ follow_form.followers_friend_ratio_min|as_crispy_field }}
+      </div>
+      <div class="col-2">
+        {{ follow_form.followers_friend_ratio_max|as_crispy_field }}
+      </div>
+      <div class="col-2">
+        {{ follow_form.last_tweet|as_crispy_field }}
+      </div>
+    </div>
     <button type="submit" class="btn btn-primary" name="suggest">Suggest</button>
     {% if suggestions|length > 0 %}
       <button type="submit" class="btn btn-success" name="save">Save</button>
@@ -97,12 +119,12 @@
           <td>{{ s.statuses_count }}</td>
           <td>
             {% with "follow:"|addstr:s.screen_name as name %}
-              <input name="{{name}}" value="{{now}}">
+              <input name="{{name}}" value="{{follow_date}}">
             {% endwith %}
           </td>
           <td>
             {% with "unfollow:"|addstr:s.screen_name as name %}
-              <input name="{{name}}" value="{{later}}">
+              <input name="{{name}}" value="{{unfollow_date}}">
             {% endwith %}
           </td>
         </tr>

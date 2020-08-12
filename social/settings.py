@@ -45,14 +45,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'crispy_forms',
+    'crispy_forms'
 )
-
-# the seconds offset to run a job. e.g. 120 means a tweet can run +/- 120 seconds from schedule
-TWEET_SCHEDULE_OFFSET = 120
-TWEET_SCHEDULE_SLEEP = 5 # how long to sleep before checking new things to tweet
-TWEET_SHOW_OLD = 5 # how many old sent tweets to show in manage
-UNFOLLOW_DEFAULT_DAYS = 5 # number of days before unfollowing someone
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 

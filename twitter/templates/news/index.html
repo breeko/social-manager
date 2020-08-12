@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load twitter_extras %}
+
+{{ form.media }}
+
+{% block content %}
+  <form action="{% url 'twitter:news' %}" method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary" name="generate">Generate</button>
+    {% if suggestions|length > 0 %}
+      <button type="submit" class="btn btn-success" name="save">Save</button>
+    {% endif %}
+    <hr/>
+    <h3>Suggestions</h3>
+    <table class="table">
+      <tr>
+      <th>
+        Save
+      </th>
+      <th>
+        Source
+      </th>
+      <th>
+        Article
+      </th>
+      <th>
+        Body
+      </th>
+      <th>
+        Schedule
+      </th>
+      <th>
+        User
+      </th>
+      </tr>
+      {% for s in suggestions %}
+        <tr>
+          <td>
+            <input type="checkbox" name="to_save" value="{{s.link}}">
+          </td>
+          <td>
+            {% with s.link|get_domain as url %}
+              {{ url }}
+            {% endwith %}
+          </td>
+          <td>
+            <a href="{{ s.link }}" target="_blank" rel=noopener>
+              {{ s.title }}
+            </a>
+          </td>
+          <td>
+            {% with "body:"|addstr:s.link as name %}
+              <textarea rows="2" cols="40" name="{{name}}"></textarea>
+            {% endwith %}
+          </td>
+          <td>
+            {% with "schedule:"|addstr:s.link as name %}
+              <input name="{{name}}" value="{{now}}">
+            {% endwith %}
+          </td>
+          <td>
+            {% with "user:"|addstr:s.link as name %}
+              <select name="{{name}}">
+                {% for u in user_names %}
+                  <option value="{{u}}">{{u}}</option>
+                {% endfor %}
+              </select>
+            {% endwith %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+    <hr/>
+  </form>
+{% endblock %}

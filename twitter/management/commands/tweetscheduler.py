@@ -1,7 +1,7 @@
 from twitter.models import User, Tweet, Follow
 from time import sleep
 from django.utils import timezone
-from social.settings import TWEET_SCHEDULE_OFFSET, TWEET_SCHEDULE_SLEEP
+from twitter.settings import TWEET_SCHEDULE_OFFSET, TWEET_SCHEDULE_SLEEP
 from django.core.management.base import BaseCommand, CommandError
 import logging
 from twitter.utils.twitter_utils import get_api
