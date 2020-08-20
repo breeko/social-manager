@@ -9,7 +9,7 @@ from django.utils import timezone
 from tweepy.error import TweepError
 
 from twitter.models import Follow, Tweet
-from twitter.settings import TweetSchedulerSettings as Settings
+from twitter.settings import settings
 from twitter.utils.twitter_utils import get_api
 
 logging.basicConfig(
@@ -26,7 +26,7 @@ def process_tweet(tweet: Tweet):
   api.update_status(tweet.body)
   tweet.sent = timezone.now()
   tweet.save(update_fields=["sent"])
-  logging.info("[%s]: %s", tweet.user.username, tweet.body)
+  logging.info("[%s]: tweeted %s", tweet.user.username, tweet.body)
 
 def process_follow(follow: Follow):
   """ Processes user follows """
@@ -57,18 +57,18 @@ class Command(BaseCommand):
           handle_tweet()
         except TweepError as err:
           logging.error("Failure to tweet: %s", err)
-          tweet_sleep_until = now + timedelta(seconds=Settings.SLEEP_FAILURE)
+          tweet_sleep_until = now + timedelta(seconds=settings.tweet_scheduler.sleep_failure)
       if now > follow_sleep_until:
         try:
           handle_follow()
         except TweepError as err:
           logging.error("Failure to tweet: %s", err)
-          follow_sleep_until = now + timedelta(seconds=Settings.SLEEP_FAILURE)
-      sleep(Settings.SLEEP)
+          follow_sleep_until = now + timedelta(seconds=settings.tweet_scheduler.sleep_failure)
+      sleep(settings.tweet_scheduler.sleep)
 
 def handle_tweet():
   """ Handles user tweets """
-  offset = timezone.timedelta(seconds=Settings.SCHEDULE_PRECISION)
+  offset = timezone.timedelta(seconds=settings.tweet_scheduler.schedule_precision)
   now = timezone.now()
   start = now - offset
   end = now + offset

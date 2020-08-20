@@ -1,7 +1,7 @@
 """ models.py """
 
 from django.db import models
-
+from typing import NewType
 
 class User(models.Model):
   """ Model for user used to store credentials """

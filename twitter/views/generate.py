@@ -5,7 +5,7 @@ from django import forms
 from django.http import HttpResponse
 from django.template import loader
 
-from twitter.settings import GenerateSettings as Settings
+from twitter.settings import settings
 
 from ..models import Tweet, User
 from ..utils.twitter_utils import MODEL_CHOICES, generate_tweet, get_trends
@@ -20,20 +20,20 @@ def generate(request):
   else:
     trends = []
 
-  if (request.method == "GET"):
+  if request.method == "GET":
     suggestions = []
     form = GenerateTweetForm()
-  elif (request.method == "POST"):
+  elif request.method == "POST":
     form = GenerateTweetForm(request.POST)
     if 'generate' in request.POST:
       phrase = form.data.get('phrase', '')
       model = form.data.get('model')
-      suggestions = [generate_tweet(phrase, model) for _ in range(Settings.NUM_GENERATE_SUGGESTIONS)]
+      suggestions = [generate_tweet(phrase, model) for _ in range(settings.generate.num_suggestions)]
     elif 'trend' in request.POST:
       trend = request.POST['trend']
       model = form.data.get('model')
       form = GenerateTweetForm(initial={'phrase': trend})
-      suggestions = [generate_tweet(trend, model) for _ in range(Settings.NUM_GENERATE_SUGGESTIONS)]
+      suggestions = [generate_tweet(trend, model) for _ in range(settings.generate.num_suggestions)]
     elif 'save' in request.POST:
       key = request.POST['save']
       checks = [k for k in request.POST.keys() if k.startswith('check')]

@@ -5,7 +5,7 @@ from django import forms
 from django.http import HttpResponse
 from django.template import loader
 
-from twitter.settings import NewsSettings as Settings
+from twitter.settings import settings
 
 from ..models import Tweet, User
 from ..utils.news_utils import TOPIC_CHOICES, get_news
@@ -13,10 +13,9 @@ from ..utils.news_utils import TOPIC_CHOICES, get_news
 def news(request):
   """ view for /twitter/news """
   template = loader.get_template('news/index.html')
-
   if request.method == "GET":
     suggestions = []
-    form = GenerateNewsForm(initial={'sources': Settings.DEFAULT_NEWS_SOURCES, 'topic': Settings.DEFAULT_TOPIC})
+    form = GenerateNewsForm(initial={'sources': settings.news.default_sources, 'topic': settings.news.default_topic})
   elif request.method == "POST":
     form = GenerateNewsForm(request.POST)
     if 'generate' in request.POST:
@@ -30,7 +29,7 @@ def news(request):
         username = request.POST.get(f"user:{save}")
         user = User.objects.get(username=username)
         schedule = request.POST.get(f"schedule:{save}")
-        tweet_body = body + save
+        tweet_body = body + " " + save
         tweet = Tweet(user=user, body=tweet_body, scheduled=schedule)
         tweet.save()
       suggestions = []

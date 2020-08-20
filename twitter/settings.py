@@ -1,41 +1,75 @@
 """ settings.py """
+import json
+import os
+
+USER_SETTINGS = "twitter/settings.json"
+DEFAULT_SETTINGS = "twitter/default-settings.json"
 
 class TweetSchedulerSettings:
   """ Settings for tweetscheduler.py """
-  # how long to sleep before checking new things to tweet
-  SLEEP = 5
+  def __init__(self, d):
+    settings_d = d.get('TweetScheduler', {})
 
-  # the seconds offset to run a job. e.g. 120 means a tweet can run +/- 120 seconds from schedule
-  SCHEDULE_PRECISION = 120
+    # how long to sleep before checking new things to tweet
+    self.sleep = settings_d.get("sleep")
 
-  # how long to sleep after failure
-  SLEEP_FAILURE = 60 * 60 * 2
+    # the seconds offset to run a job.
+    # e.g. 120 means a tweet can run +/- 120 seconds from schedule
+    self.schedule_precision = settings_d.get("schedule_precision")
+
+    # how long to sleep after failure
+    self.sleep_failure = settings_d.get("sleep_failure")
 
 class ManageSettings:
   """ Settings for manage.py """
+  def __init__(self, d):
+    settings_d = d.get('Manage', {})
 
-  # how many old sent tweets to show in manage
-  SHOW_OLD = 5
+    # how many old sent tweets to show in manage
+    self.show_old = settings_d.get("show_old")
 
 class FollowSettings:
-  """ Settings for follow.py """
+  """ Settings for manage.py """
+  def __init__(self, d):
+    settings_d = d.get('Follow', {})
 
-  # number of days before unfollowing someone
-  UNFOLLOW_DEFAULT_DAYS = None
+    # number of follow suggestions to generate
+    self.num_suggestions = settings_d.get("num_suggestions")
 
-  # number of follow suggestions to generate
-  NUM_FOLLOW_SUGGESTIONS = 50
+    # number of days before unfollowing someone
+    self.unfollow_default_days = settings_d.get("unfollow_default_days")
 
-  # default filter for users with this many days since last tweet
-  LAST_TWEET_DAYS = 7
+    # commas separated list of words to exclude when generating follow suggestions
+    self.default_blacklist = settings_d.get("default_blacklist")
 
 class GenerateSettings:
-  """ Settings for generate.py """
-  # number of  tweet suggestions to generate
-  NUM_GENERATE_SUGGESTIONS = 2
+  """ Settings for manage.py """
+  def __init__(self, d):
+    settings_d = d.get('Generate', {})
 
+    # number of  tweet suggestions to generate
+    self.num_suggestions = settings_d.get("num_suggestions")
 
 class NewsSettings:
-  DEFAULT_NEWS_SOURCES = "news.ycombinator.com, techcrunch.com, nytimes.com"
-  
-  DEFAULT_TOPIC = "tech"
+  """ Settings for news.py """
+  def __init__(self, d):
+    settings_d = d.get('News', {})
+
+    # number of  tweet suggestions to generate
+    self.default_sources = settings_d.get("default_sources")
+
+    self.default_topic = settings_d.get("default_topic")
+
+class SettingsClass:
+  """ class to hold all user settings """
+  def __init__(self):
+    settings_path = USER_SETTINGS if os.path.exists(USER_SETTINGS) else DEFAULT_SETTINGS
+    with open(settings_path, "r") as f:
+      self.inner = json.loads(f.read())
+    self.tweet_scheduler = TweetSchedulerSettings(self.inner)
+    self.manage = ManageSettings(self.inner)
+    self.follow = FollowSettings(self.inner)
+    self.generate = GenerateSettings(self.inner)
+    self.news = NewsSettings(self.inner)
+
+settings = SettingsClass()

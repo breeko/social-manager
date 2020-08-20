@@ -15,27 +15,15 @@
       {% endfor %}
     </select>
     <div class="row" style="font-size: 10px;">
-      <div class="col-2">
-        {{ follow_form.followers_min|as_crispy_field }}
-      </div>
-      <div class="col-2">
-        {{ follow_form.followers_max|as_crispy_field }}
-      </div>
-      <div class="col-2">
-        {{ follow_form.friends_min|as_crispy_field }}
-      </div>
-      <div class="col-2">
-        {{ follow_form.friends_max|as_crispy_field }}
-      </div>
-      <div class="col-2">
-        {{ follow_form.followers_friend_ratio_min|as_crispy_field }}
-      </div>
-      <div class="col-2">
-        {{ follow_form.followers_friend_ratio_max|as_crispy_field }}
-      </div>
-      <div class="col-2">
-        {{ follow_form.last_tweet|as_crispy_field }}
-      </div>
+      <div class="col-12">{{ follow_form.hashtag|as_crispy_field }}</div>
+      <div class="col-12">{{ follow_form.blacklist|as_crispy_field }}</div>
+      <div class="col-2">{{ follow_form.followers_min|as_crispy_field }}</div>
+      <div class="col-2">{{ follow_form.followers_max|as_crispy_field }}</div>
+      <div class="col-2">{{ follow_form.friends_min|as_crispy_field }}</div>
+      <div class="col-2">{{ follow_form.friends_max|as_crispy_field }}</div>
+      <div class="col-2">{{ follow_form.followers_friend_ratio_min|as_crispy_field }}</div>
+      <div class="col-2">{{ follow_form.followers_friend_ratio_max|as_crispy_field }}</div>
+      <div class="col-2">{{ follow_form.since|as_crispy_field }}</div>
     </div>
     <button type="submit" class="btn btn-primary" name="suggest">Suggest</button>
     {% if suggestions|length > 0 %}
@@ -44,45 +32,17 @@
     <hr/>
     <h3>Suggestions</h3>
     <table class="table" style="font-size: 8px;">
-      <!-- # created_at, 
-      # (followers_count, friends_count), 
-      # default_profile or defualt_profile_image
-      # description
-      # statuses_count, favourites_count, retweet_count -->
       <tr>
-        <th>
-          Save
-        </th>
-        <th>
-          Name
-        </th>
-        <th>
-          Description
-        </th>
-        <th>
-          Created
-        </th>
-        <th>
-          Last
-        </th>
-        <th>
-          Followers
-        </th>
-        <th>
-          Friends
-        </th>
-        <th>
-          Defaults
-        </th>
-        <th>
-          # status
-        </th>
-        <th>
-          Follow
-        </th>
-        <th>
-          Unfollow
-        </th>
+        <th>Save</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Created</th>
+        <th>Followers</th>
+        <th>Friends</th>
+        <th>Defaults</th>
+        <th># status</th>
+        <th>Follow</th>
+        <th>Unfollow</th>
       </tr>
       {% for s in suggestions %}
         <tr>
@@ -103,12 +63,15 @@
             {% endwith %}
           </td>
           <td>
-            {% with s.status.created_at|month_year as date %}
-              {{ date }}
+            {% with s.followers_count|comma_number as ct %}
+              {{ ct }}
             {% endwith %}
           </td>
-          <td>{{ s.followers_count }}</td>
-          <td>{{ s.friends_count }}</td>
+          <td>
+            {% with s.friends_count|comma_number as ct %}
+              {{ ct }}
+            {% endwith %}
+          </td>
           <td>
             {% if s.default_profile or s.defualt_profile_image %}
               true
@@ -127,6 +90,30 @@
               <input name="{{name}}" value="{{unfollow_date}}">
             {% endwith %}
           </td>
+        </tr>
+      {% endfor %}
+    </table>
+    <hr/>
+    <h3>Pending</h3>
+    <table class="table">
+      <tr>
+        <th>Action</th>
+        <th>User</th>
+        <th>Follow username</th>
+        <th>Follow</th>
+        <th>Unfollow</th>
+        <th>Unfollowed</th>
+      </tr>
+      {% for p in pending %}
+        <tr>
+          <td>
+            <a class="btn btn-danger btn-sm" href="{% url 'twitter:delete_follow' p.id%}">🗑️</a>
+          </td>
+          <td>{{ p.user }}</td>
+          <td>{{ p.username }}</td>
+          <td>{{ p.follow }}</td>
+          <td>{{ p.unfollow }}</td>
+          <td>{{ p.unfollowed }}</td>
         </tr>
       {% endfor %}
     </table>

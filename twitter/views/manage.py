@@ -3,14 +3,14 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 
-from twitter.settings import ManageSettings as Settings
+from twitter.settings import settings
 
 from ..models import Tweet
 
 def manage(request):
   """ view for twitter/manage """
   template = loader.get_template('manage/index.html')
-  sent = Tweet.objects.filter(sent__isnull=False).order_by('-scheduled')[:Settings.SHOW_OLD]
+  sent = Tweet.objects.filter(sent__isnull=False).order_by('-scheduled')[:settings.manage.show_old]
   not_sent = Tweet.objects.filter(sent__isnull=True)
   tweets = sent | not_sent
 
