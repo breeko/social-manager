@@ -6,9 +6,9 @@ USER_SETTINGS = "twitter/settings.json"
 DEFAULT_SETTINGS = "twitter/default-settings.json"
 
 class SchedulerSettings:
-  """ Settings for tweetscheduler.py """
+  """ Settings for scheduler.py """
   def __init__(self, d):
-    settings_d = d.get('TweetScheduler', {})
+    settings_d = d.get('Scheduler', {})
 
     # how long to sleep before checking new things to tweet
     self.sleep = settings_d.get("sleep")

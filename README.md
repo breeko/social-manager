@@ -17,7 +17,7 @@ Schedule tweets and automatically generate tweets. Multiple account support, jus
 
 > screen -A social-manager-scheduler
 > source venv/bin/activate
-> python manage.py tweetscheduler
+> python manage.py scheduler
 
 // detach screen ctrl+a d
 > screen -A social-manager-server
