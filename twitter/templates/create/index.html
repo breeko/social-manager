@@ -4,21 +4,6 @@
 
 {{ form.media }}
 
-{% block javascript %}
-  <script>
-    $.ajax({
-      url: '{% url "twitter:say_hi" %}',
-      data: {
-        'name': 'bob'
-      },
-      dataType: 'json',
-      success: (data) => {
-        console.log(data)
-      }
-    })
-  </script>
-{% endblock %}
-
 {% block content %}
   <form action="{% url 'twitter:create' %}" method="post">
     {% csrf_token %}

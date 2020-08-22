@@ -100,8 +100,8 @@
         <th>Action</th>
         <th>User</th>
         <th>Follow username</th>
-        <th>Follow</th>
         <th>Unfollow</th>
+        <th>Followed</th>
         <th>Unfollowed</th>
       </tr>
       {% for p in pending %}
@@ -111,8 +111,8 @@
           </td>
           <td>{{ p.user }}</td>
           <td>{{ p.username }}</td>
-          <td>{{ p.follow }}</td>
           <td>{{ p.unfollow }}</td>
+          <td>{{ p.followed }}</td>
           <td>{{ p.unfollowed }}</td>
         </tr>
       {% endfor %}

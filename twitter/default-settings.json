@@ -1,7 +1,7 @@
 {
-  "TweetScheduler": {
+  "Scheduler": {
     "sleep": 5,
-    "schedule_precision": 120,
+    "precision": 120,
     "sleep_failure": 28800
   },
 
@@ -21,6 +21,5 @@
   "News": {
     "default_sources": "nytimes.com",
     "default_topic": "news"
-}
-
+  }
 }

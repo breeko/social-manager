@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from twitter.models import Follow, User
 from twitter.settings import settings
+from django.db.utils import IntegrityError
 
 from ..utils.twitter_utils import create_valid_user, get_suggestions
 
@@ -24,14 +25,17 @@ def follow(request):
     user = User.objects.get(username=username)
     follow_form = FollowTweetForm(request.POST)
     if 'suggest' in request.POST:
+      expressions = [
+        f"followers_count <= {follow_form.data.get('followers_max') or 2**32}",
+        f"followers_count >= {follow_form.data.get('followers_min') or 0}",
+        f"friends_count <= {follow_form.data.get('friends_max') or 2**32}",
+        f"friends_count >= {follow_form.data.get('friends_min') or 0}",
+        f"followers_count / ( friends_count + 1 ) <= {follow_form.data.get('followers_friend_ratio_max') or 2**32}",
+        f"followers_count / ( friends_count + 1 ) >= {follow_form.data.get('followers_friend_ratio_min') or 0}"
+      ]
       valid_user = create_valid_user(
         blacklist=follow_form.data.get('blacklist'),
-        followers_max=follow_form.data.get('followers_max'),
-        followers_min=follow_form.data.get('followers_min'),
-        friends_max=follow_form.data.get('friends_max'),
-        friends_min=follow_form.data.get('friends_min'),
-        followers_friend_ratio_min=follow_form.data.get('followers_friend_ratio_min'),
-        followers_friend_ratio_max=follow_form.data.get('followers_friend_ratio_max')
+        expressions=expressions
       )
       hashtag = follow_form.data.get("hashtag")
       since = follow_form.data.get("since")
@@ -46,7 +50,12 @@ def follow(request):
           follow_ = Follow(username=s, user=user, follow=to_follow)
         else:
           follow_ = Follow(username=s, user=user, follow=to_follow, unfollow=to_unfollow)
-        follow_.save()
+
+        try:
+          follow_.save()
+        except IntegrityError:
+          # user has already been followed or queued to be followed
+          continue
 
   now = datetime.now()
   follow_date = now.strftime("%Y-%m-%d %H:%M")

@@ -7,6 +7,7 @@ import tweepy
 from bs4 import BeautifulSoup
 from requests.utils import quote
 from tweepy.api import API
+from twitter.utils.parse_utils import build_expr
 
 MODEL_CHOICES = (
   ('gpt2', 'gpt2'),
@@ -85,39 +86,30 @@ def get_suggestions(
   """
   api = get_api(user)
   suggestions = []
+  seen = set()
 
   for tweet in tweepy.Cursor(api.search, q=hashtag, lang="en", since=since).items():
-    if valid_user(tweet.user):
+    if tweet.user.screen_name not in seen and valid_user(tweet.user):
       suggestions.append(tweet.user)
+    seen.add(tweet.user.screen_name)
     if len(suggestions) >= max_suggestions:
       break
 
   return suggestions
 
-def create_valid_user(
-    blacklist: str,
-    followers_max: str,
-    followers_min: str,
-    friends_max: str,
-    friends_min: str,
-    followers_friend_ratio_min: str,
-    followers_friend_ratio_max: str
-  ):
-  """ Returns a function that takes a user and returns whether the user is valid"""
+def create_valid_user(blacklist: str, expressions: List[str]) -> bool:
+  """ Returns a function that takes a user and returns whether the user is valid
+    e.g. f('bot', ['friends_count > 100', 'followers_count >= 200'])
+  """
+  built_expressions = []
+  for expression in expressions:
+    built = build_expr(expression)
+    built_expressions.append(built)
+
+  valid = lambda u: all([expr(u) for expr in built_expressions])
+
   def valid_user(user: 'User') -> bool:
     return \
-      (blacklist == '' or
-       not any([w for w in blacklist.split(",") if w.lower() in user.description.lower()])) and \
-      (followers_min == ''
-       or user.followers_count >= int(followers_min)) and \
-      (followers_max == ''
-       or user.followers_count <= int(followers_max)) and \
-      (friends_min == ''
-       or user.friends_count >= int(friends_min)) and \
-      (friends_max == ''
-       or user.friends_count <= int(friends_max)) and \
-      (followers_friend_ratio_min == ''
-       or user.followers_count / user.friends_count >= float(followers_friend_ratio_min)) and \
-      (followers_friend_ratio_max == ''
-       or user.followers_count / user.friends_count <= float(followers_friend_ratio_max))
+      (blacklist == '' or not any([w for w in blacklist.split(",") if w.lower() in user.description.lower()])) \
+        and valid(user)
   return valid_user

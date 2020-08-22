@@ -1,7 +1,6 @@
 """ models.py """
 
 from django.db import models
-from typing import NewType
 
 class User(models.Model):
   """ Model for user used to store credentials """
@@ -20,8 +19,6 @@ class Tweet(models.Model):
   id = models.AutoField(primary_key=True)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
   body = models.CharField(max_length=240, null=False)
-  created = models.DateTimeField('date created', auto_now_add=True)
-  modified = models.DateTimeField('date modified', auto_now=True)
   scheduled = models.DateTimeField('date scheduled', null=True, blank=True)
   sent = models.DateTimeField('date sent', null=True, blank=True)
 
@@ -32,7 +29,7 @@ class Follow(models.Model):
   """ Model for tweet used to store and schedule follows made """
   id = models.AutoField(primary_key=True)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
-  username = models.CharField(max_length=240, null=False)
+  username = models.CharField(max_length=240, null=False, unique=True)
   follow = models.DateTimeField('date to follow', null=True, blank=True)
   unfollow = models.DateTimeField('date to unfollow', null=True, blank=True)
   followed = models.DateTimeField('date did follow', null=True, blank=True)

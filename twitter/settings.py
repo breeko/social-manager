@@ -5,7 +5,7 @@ import os
 USER_SETTINGS = "twitter/settings.json"
 DEFAULT_SETTINGS = "twitter/default-settings.json"
 
-class TweetSchedulerSettings:
+class SchedulerSettings:
   """ Settings for tweetscheduler.py """
   def __init__(self, d):
     settings_d = d.get('TweetScheduler', {})
@@ -15,7 +15,7 @@ class TweetSchedulerSettings:
 
     # the seconds offset to run a job.
     # e.g. 120 means a tweet can run +/- 120 seconds from schedule
-    self.schedule_precision = settings_d.get("schedule_precision")
+    self.precision = settings_d.get("precision")
 
     # how long to sleep after failure
     self.sleep_failure = settings_d.get("sleep_failure")
@@ -66,7 +66,7 @@ class SettingsClass:
     settings_path = USER_SETTINGS if os.path.exists(USER_SETTINGS) else DEFAULT_SETTINGS
     with open(settings_path, "r") as f:
       self.inner = json.loads(f.read())
-    self.tweet_scheduler = TweetSchedulerSettings(self.inner)
+    self.scheduler = SchedulerSettings(self.inner)
     self.manage = ManageSettings(self.inner)
     self.follow = FollowSettings(self.inner)
     self.generate = GenerateSettings(self.inner)

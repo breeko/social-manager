@@ -13,11 +13,11 @@ from twitter.settings import settings
 from twitter.utils.twitter_utils import get_api
 
 logging.basicConfig(
-  filename='tweetscheduler.log',
+  filename='scheduler.log',
   filemode='a',
   format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
   datefmt='%H:%M:%S',
-  level=logging.DEBUG
+  level=logging.INFO
 )
 
 def process_tweet(tweet: Tweet):
@@ -57,18 +57,18 @@ class Command(BaseCommand):
           handle_tweet()
         except TweepError as err:
           logging.error("Failure to tweet: %s", err)
-          tweet_sleep_until = now + timedelta(seconds=settings.tweet_scheduler.sleep_failure)
+          tweet_sleep_until = now + timedelta(seconds=settings.scheduler.sleep_failure)
       if now > follow_sleep_until:
         try:
           handle_follow()
         except TweepError as err:
           logging.error("Failure to tweet: %s", err)
-          follow_sleep_until = now + timedelta(seconds=settings.tweet_scheduler.sleep_failure)
-      sleep(settings.tweet_scheduler.sleep)
+          follow_sleep_until = now + timedelta(seconds=settings.scheduler.sleep_failure)
+      sleep(settings.scheduler.sleep)
 
 def handle_tweet():
   """ Handles user tweets """
-  offset = timezone.timedelta(seconds=settings.tweet_scheduler.schedule_precision)
+  offset = timezone.timedelta(seconds=settings.scheduler.precision)
   now = timezone.now()
   start = now - offset
   end = now + offset
