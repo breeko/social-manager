@@ -26,4 +26,7 @@ class NewTweetForm(forms.ModelForm):
   """ Form for creating a tweet"""
   class Meta:
     model = Tweet
-    fields = ('user', 'body', 'scheduled',)
+    fields = ('user', 'body', 'scheduled')
+    widgets = {
+      'body': forms.Textarea(attrs={'rows':4}),
+    }
