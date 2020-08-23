@@ -5,8 +5,8 @@ from django import forms
 from django.http import HttpResponse
 from django.template import loader
 
-from ..models import Tweet
-
+from twitter.models import Tweet
+from twitter.utils.date_utils import format_date
 
 def index(request):
   """ view for settings """
@@ -15,7 +15,7 @@ def index(request):
     form = NewTweetForm(request.POST)
     if form.is_valid():
       form.save(commit=True)
-  form = NewTweetForm(initial={'scheduled': datetime.now().strftime("%Y-%m-%d %H:%M")})
+  form = NewTweetForm(initial={'scheduled': format_date()})
   
   context = {
     'form': form,

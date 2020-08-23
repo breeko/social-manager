@@ -87,12 +87,13 @@ def get_suggestions(
   api = get_api(user)
   suggestions = []
   seen = set()
+  max_iters = 5000
 
   for tweet in tweepy.Cursor(api.search, q=hashtag, lang="en", since=since).items():
     if tweet.user.screen_name not in seen and valid_user(tweet.user):
       suggestions.append(tweet.user)
     seen.add(tweet.user.screen_name)
-    if len(suggestions) >= max_suggestions:
+    if len(suggestions) >= max_suggestions or len(seen) > max_iters:
       break
 
   return suggestions

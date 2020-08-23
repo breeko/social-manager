@@ -7,6 +7,19 @@
 {{ follow_form.media }}
 
 {% block content %}
+  <h3>Bulk</h3>
+  <form action="{% url 'twitter:bulk_follow' %}" method="post">
+    <select name="bulk_username">
+      {% for u in usernames %}
+        <option value="{{u}}">{{u}}</option>
+      {% endfor %}
+    </select>
+    {% csrf_token %}
+    {{ bulk_form|crispy }}
+    <button type="submit" class="btn btn-primary" name="follow">Follow</button>
+  </form>
+  <hr/>
+  <h3>Find</h3>
   <form class="form-horizontal" action="{% url 'twitter:follow' %}" method="post">
     {% csrf_token %}
     <select name="username">
@@ -82,12 +95,16 @@
           <td>{{ s.statuses_count }}</td>
           <td>
             {% with "follow:"|addstr:s.screen_name as name %}
-              <input name="{{name}}" value="{{follow_date}}">
+              {% with follow_date|randomize_time as time %}
+                <input name="{{name}}" value="{{time}}">
+              {% endwith %}
             {% endwith %}
           </td>
           <td>
             {% with "unfollow:"|addstr:s.screen_name as name %}
-              <input name="{{name}}" value="{{unfollow_date}}">
+              {% with unfollow_date|randomize_time as time %}
+                <input name="{{name}}" value="{{time}}">
+              {% endwith %}
             {% endwith %}
           </td>
         </tr>
@@ -107,7 +124,7 @@
       {% for p in pending %}
         <tr>
           <td>
-            <a class="btn btn-danger btn-sm" href="{% url 'twitter:delete_follow' p.id%}">🗑️</a>
+            <a class="btn btn-sm" href="{% url 'twitter:delete_follow' p.id%}">🗑️</a>
           </td>
           <td>{{ p.user }}</td>
           <td>{{ p.username }}</td>

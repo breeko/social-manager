@@ -7,9 +7,9 @@ from django.template import loader
 
 from twitter.settings import settings
 
-from ..models import Tweet, User
-from ..utils.twitter_utils import MODEL_CHOICES, generate_tweet, get_trends
-
+from twitter.models import Tweet, User
+from twitter.utils.twitter_utils import MODEL_CHOICES, generate_tweet, get_trends
+from twitter.utils.date_utils import format_date
 
 def generate(request):
   """ view for twitter/generate """
@@ -52,7 +52,7 @@ def generate(request):
     'form': form,
     'suggestions': suggestions,
     'title': 'Generate',
-    'now': datetime.now().strftime("%Y-%m-%d %H:%M"),
+    'now': format_date(),
     'trends': trends,
     'user_names': user_names
   }

@@ -3,9 +3,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 
+from twitter.models import Tweet
 from twitter.settings import settings
 
-from ..models import Tweet
 
 def manage(request):
   """ view for twitter/manage """

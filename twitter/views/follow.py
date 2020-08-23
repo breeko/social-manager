@@ -2,21 +2,28 @@
 from datetime import datetime, timedelta
 
 from django import forms
+from django.db.utils import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 
 from twitter.models import Follow, User
 from twitter.settings import settings
-from django.db.utils import IntegrityError
+from twitter.utils.date_utils import format_date, read_date
+from twitter.utils.twitter_utils import create_valid_user, get_suggestions
+from random import random
 
-from ..utils.twitter_utils import create_valid_user, get_suggestions
+def get_unfollow_date():
+  if settings.follow.unfollow_default_days is None:
+    return None 
+  return format_date(datetime.now() + timedelta(days=settings.follow.unfollow_default_days))
 
 def follow(request):
   """ form to generate follows """
   template = loader.get_template('follow/index.html')
   usernames = [u.username for u in User.objects.all()]
 
+  bulk_form = BulkFollowForm(initial=BulkFollowFormDefaults)
   follow_form = FollowTweetForm(initial=FollowTweetFormDefaults)
 
   suggestions = []
@@ -57,13 +64,11 @@ def follow(request):
           # user has already been followed or queued to be followed
           continue
 
-  now = datetime.now()
-  follow_date = now.strftime("%Y-%m-%d %H:%M")
-  unfollow_date = None if settings.follow.unfollow_default_days is None else \
-    (now + timedelta(days=settings.follow.unfollow_default_days)).strftime("%Y-%m-%d %H:%M")
-
+  follow_date = format_date()
+  unfollow_date = get_unfollow_date()
   pending = Follow.objects.filter(unfollowed__isnull=True)
   context = {
+    'bulk_form': bulk_form,
     'follow_form': follow_form,
     'title': "Follow",
     'suggestions': suggestions,
@@ -73,6 +78,14 @@ def follow(request):
     'pending': pending
   }
   return HttpResponse(template.render(context, request))
+
+class BulkFollowForm(forms.Form):
+  unfollow = forms.DateField(label="Unfollow", required=False)
+  users = forms.CharField(label="Users", widget=forms.Textarea(attrs={"rows": 5, "cols": 20}))
+
+BulkFollowFormDefaults = {
+  "unfollow": get_unfollow_date()
+}
 
 class FollowTweetForm(forms.Form):
   hashtag = forms.CharField(label="Hashtag", required=True)
@@ -89,6 +102,18 @@ FollowTweetFormDefaults = {
   "since": datetime.now() - timedelta(days=1),
   "blacklist": settings.follow.default_blacklist
 }
+
+def bulk_follow(request):
+  if request.method == 'POST':
+    username = request.POST.get('bulk_username')
+    user = User.objects.get(username=username)
+    unfollow = request.POST.get('unfollow')
+    for u in request.POST.get('users').split("\n"):
+      to_follow = u.strip()
+      unfollow_random = read_date(unfollow) + timedelta(hours=random())
+      follow_random = datetime.now() + timedelta(hours=random())
+      Follow(username=to_follow, user=user, follow=follow_random, unfollow=unfollow_random).save()
+  return HttpResponseRedirect(reverse('twitter:follow'))
 
 def delete_follow(request, pk: int):
   """ Deletes a given follow id """

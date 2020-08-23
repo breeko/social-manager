@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
 
-from ..models import User
+from twitter.models import User
 
 
 def users(request):

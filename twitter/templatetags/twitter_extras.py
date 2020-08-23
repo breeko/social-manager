@@ -1,9 +1,12 @@
 """ twitter_extras.py"""
 
-from datetime import datetime
+from datetime import datetime, timedelta
+from random import random
 from urllib.parse import urlparse
 
 from django import template
+
+from twitter.utils.date_utils import format_date, read_date
 
 register = template.Library()
 
@@ -36,3 +39,18 @@ def comma_number(value) -> str:
   if type(value) in [float, int]:
     return f'{value:,}'
   return value
+
+@register.filter
+def randomize_time(value) -> str:
+  """ Randomizes the time by adding up to an hour
+    e.g. f(8:35) => 8:42
+  """
+  if not isinstance(value, str):
+    return value
+  try:
+    date = read_date(value)
+    date += timedelta(hours=random())
+    date_value = format_date(date)
+    return date_value
+  except ValueError:
+    return value

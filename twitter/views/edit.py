@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 
-from ..models import Tweet
+from twitter.models import Tweet
 
 
 def edit_tweet(request, tweet_id: int):

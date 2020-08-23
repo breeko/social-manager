@@ -7,8 +7,9 @@ from django.template import loader
 
 from twitter.settings import settings
 
-from ..models import Tweet, User
-from ..utils.news_utils import TOPIC_CHOICES, get_news
+from twitter.models import Tweet, User
+from twitter.utils.news_utils import TOPIC_CHOICES, get_news
+from twitter.utils.date_utils import format_date
 
 def news(request):
   """ view for /twitter/news """
@@ -39,7 +40,7 @@ def news(request):
     'form': form,
     'suggestions': suggestions,
     'title': 'Generate News',
-    'now': datetime.now().strftime("%Y-%m-%d %H:%M"),
+    'now': format_date(),
     'user_names': user_names
   }
 
