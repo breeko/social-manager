@@ -3,9 +3,10 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+  <h3>Tweets</h3>
   <table class="table">
     <thead>
-      <tr>
+      <tr class="sticky">
         <th scope="action">Action</th>
         <th scope="username">Username</th>
         <th scope="body">Body</th>
@@ -17,12 +18,10 @@
     <tr>
       <td style="display: contents;">
         <span>
-        <a class="btn btn-sm" href="{% url 'twitter:edit_tweet' tweet.id %}">
-          ✏️
-        </a>
-        <a class="btn btn-sm" href="{% url 'twitter:delete_tweet' tweet.id%}">
-          🗑️
-        </a>
+          {% if tweet.sent == None %}
+            <a class="btn btn-sm" href="{% url 'twitter:edit_tweet' tweet.id %}">✏️</a>
+            <a class="btn btn-sm" href="{% url 'twitter:delete_tweet' tweet.id%}">🗑️</a>
+          {% endif %}
       </span>
       </td>
       <td>{{tweet.user.username}}</td>
@@ -32,5 +31,30 @@
     </tr>
   {% endfor %}
   </table>
+  <hr/>
+  <h3>Follows</h3>
+  <table class="table">
+    <tr class="sticky">
+      <th>Action</th>
+      <th>User</th>
+      <th>To follow</th>
+      <th>Unfollow</th>
+      <th>Followed</th>
+      <th>Unfollowed</th>
+    </tr>
+    {% for f in follows %}
+      <tr>
+        <td>
+          <a class="btn btn-sm" href="{% url 'twitter:delete_follow' f.id%}">🗑️</a>
+        </td>
+        <td>{{ f.user }}</td>
+        <td>{{ f.username }}</td>
+        <td>{{ f.unfollow }}</td>
+        <td>{{ f.followed }}</td>
+        <td>{{ f.unfollowed }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  <hr/>
 {% endblock %}
 

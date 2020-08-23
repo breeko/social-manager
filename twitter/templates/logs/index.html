@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+  {% for log in logs %}
+    <p>{{log}}</p>
+  {% endfor %}
+{% endblock %}

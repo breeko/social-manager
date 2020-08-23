@@ -39,7 +39,7 @@ def news(request):
   context = {
     'form': form,
     'suggestions': suggestions,
-    'title': 'Generate News',
+    'title': 'News',
     'now': format_date(),
     'user_names': user_names
   }

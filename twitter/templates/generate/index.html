@@ -6,9 +6,17 @@
 {{ form.media }}
 
 {% block content %}
+  <h3>Create</h3>
+  <form action="{% url 'twitter:create_tweet' %}" method="post">
+    {% csrf_token %}
+    {{ create_form|crispy }}
+    <button type="submit" class="btn btn-primary" value="create">Create</button>
+  </form>
+  <hr class="solid">
+  <h3>Auto Generate</h3>
   <form action="{% url 'twitter:generate' %}" method="post">
     {% csrf_token %}
-    {{ form|crispy }}
+    {{ generate_form|crispy }}
     <button type="submit" class="btn btn-primary" name="generate">Generate</button>
     {% if suggestions|length > 0 %}
       <button type="submit" class="btn btn-success" name="save">Save</button>
@@ -16,19 +24,11 @@
     <hr/>
     <h3>Suggestions</h3>
     <table class="table">
-      <tr>
-      <th>
-        Save
-      </th>
-      <th>
-        Body
-      </th>
-      <th>
-        Schedule
-      </th>
-      <th>
-        User
-      </th>
+      <tr class="sticky">
+        <th>Save</th>
+        <th>Body</th>
+        <th>Schedule</th>
+        <th>User</th>
       </tr>
       {% for s in suggestions %}
         <tr>

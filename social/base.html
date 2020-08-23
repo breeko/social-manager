@@ -22,10 +22,17 @@
       tr.sticky {
         position: -webkit-sticky; /* safari */
         position: sticky;
+        text-align: center;
         top: 50px;
         background: white;
         padding: 0px;
         font-size: 20px;
+      }
+      .container {
+        padding-top: 50px;
+      }
+      h1.page-title {
+        text-align: center;
       }
     </style>
     <title>{{ title }}</title>
@@ -36,13 +43,13 @@
         <div class="col-12">
           <ul class="navbar navbar-expand-lg bg-primary fixed-top">
               <a class="nav-link text-light" href="/twitter/users">Users</a>
-              <a class="nav-link text-light" href="/twitter/create">Create</a>
-              <a class="nav-link text-light" href="/twitter/manage">Manage</a>
               <a class="nav-link text-light" href="/twitter/generate">Generate</a>
+              <a class="nav-link text-light" href="/twitter/manage">Manage</a>
               <a class="nav-link text-light" href="/twitter/follow">Follow</a>
               <a class="nav-link text-light" href="/twitter/news">News</a>
+              <a class="nav-link text-light" href="/twitter/logs">Logs</a>
           </ul>
-          <h1 class="mt-2">{{title}}</h1>
+          <h1 class="mt-2 page-title">{{title}}</h1>
           <hr class="mt-0 mb-4">
           {% block content %}{% endblock %}
         </div>

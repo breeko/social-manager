@@ -111,29 +111,5 @@
       {% endfor %}
     </table>
     <hr/>
-    <h3>Pending</h3>
-    <table class="table">
-      <tr class="sticky">
-        <th>Action</th>
-        <th>User</th>
-        <th>To follow</th>
-        <th>Unfollow</th>
-        <th>Followed</th>
-        <th>Unfollowed</th>
-      </tr>
-      {% for p in pending %}
-        <tr>
-          <td>
-            <a class="btn btn-sm" href="{% url 'twitter:delete_follow' p.id%}">🗑️</a>
-          </td>
-          <td>{{ p.user }}</td>
-          <td>{{ p.username }}</td>
-          <td>{{ p.unfollow }}</td>
-          <td>{{ p.followed }}</td>
-          <td>{{ p.unfollowed }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-    <hr/>
   </form>
 {% endblock %}

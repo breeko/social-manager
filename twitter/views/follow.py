@@ -66,7 +66,6 @@ def follow(request):
 
   follow_date = format_date()
   unfollow_date = get_unfollow_date()
-  pending = Follow.objects.filter(unfollowed__isnull=True)
   context = {
     'bulk_form': bulk_form,
     'follow_form': follow_form,
@@ -74,15 +73,14 @@ def follow(request):
     'suggestions': suggestions,
     'usernames': usernames,
     'follow_date': follow_date,
-    'unfollow_date': unfollow_date,
-    'pending': pending
+    'unfollow_date': unfollow_date
   }
   return HttpResponse(template.render(context, request))
 
 class BulkFollowForm(forms.Form):
-  unfollow = forms.DateField(label="Unfollow", required=False)
   users = forms.CharField(label="Users", widget=forms.Textarea(attrs={"rows": 5, "cols": 20}))
-
+  unfollow = forms.DateField(label="Unfollow", required=False)
+  
 BulkFollowFormDefaults = {
   "unfollow": get_unfollow_date()
 }
@@ -112,12 +110,7 @@ def bulk_follow(request):
       to_follow = u.strip()
       unfollow_random = read_date(unfollow) + timedelta(hours=random())
       follow_random = datetime.now() + timedelta(hours=random())
-      Follow(username=to_follow, user=user, follow=follow_random, unfollow=unfollow_random).save()
+      if not Follow.objects.filter(username=to_follow).exists():
+        Follow(username=to_follow, user=user, follow=follow_random, unfollow=unfollow_random).save()
   return HttpResponseRedirect(reverse('twitter:follow'))
 
-def delete_follow(request, pk: int):
-  """ Deletes a given follow id """
-  to_delete = Follow.objects.get(id=pk)
-  if to_delete:
-    to_delete.delete()
-  return HttpResponseRedirect(reverse('twitter:follow'))

@@ -1,15 +1,15 @@
 """ generate.py """
-from datetime import datetime
-
 from django import forms
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
-
-from twitter.settings import settings
+from django.urls import reverse
 
 from twitter.models import Tweet, User
-from twitter.utils.twitter_utils import MODEL_CHOICES, generate_tweet, get_trends
+from twitter.settings import settings
 from twitter.utils.date_utils import format_date
+from twitter.utils.twitter_utils import (MODEL_CHOICES, generate_tweet,
+                                         get_trends)
+
 
 def generate(request):
   """ view for twitter/generate """
@@ -20,10 +20,9 @@ def generate(request):
   else:
     trends = []
 
-  if request.method == "GET":
-    suggestions = []
-    form = GenerateTweetForm()
-  elif request.method == "POST":
+  suggestions = []
+
+  if request.method == "POST":
     form = GenerateTweetForm(request.POST)
     if 'generate' in request.POST:
       phrase = form.data.get('phrase', '')
@@ -47,21 +46,48 @@ def generate(request):
         tweet.save()
       suggestions = []
 
+  generate_form = GenerateTweetForm(initial=GenerateTweetFormDefaults)
+  create_form = CreateTweetForm(initial=CreateTweetFormDefaults)
+
   user_names = [u.username for u in User.objects.all()]
   context = {
-    'form': form,
+    'create_form': create_form,
+    'generate_form': generate_form,
     'suggestions': suggestions,
     'title': 'Generate',
     'now': format_date(),
     'trends': trends,
     'user_names': user_names
   }
-
   return HttpResponse(template.render(context, request))
 
+CreateTweetFormDefaults = {
+  'scheduled': format_date()
+}
+class CreateTweetForm(forms.ModelForm):
+  """ Form for creating a tweet"""
+  class Meta:
+    model = Tweet
+    fields = ('user', 'body', 'scheduled')
+    widgets = {
+      'body': forms.Textarea(attrs={'rows': 4}),
+    }
+
+GenerateTweetFormDefaults = {
+  'scheduled': format_date()
+}
+
 class GenerateTweetForm(forms.Form):
+  """ Form to generate tweets """
   phrase = forms.CharField(label='phrase', max_length=100, required=False)
   model = forms.CharField(
     label='model',
     widget=forms.Select(choices=MODEL_CHOICES)
   )
+
+def submit_create_tweet(request):
+  if request.method == "POST":
+    form = CreateTweetForm(request.POST)
+    if form.is_valid():
+      form.save(commit=True)
+  return HttpResponseRedirect(reverse('twitter:generate'))

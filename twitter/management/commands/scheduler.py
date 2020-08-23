@@ -15,8 +15,8 @@ from twitter.utils.twitter_utils import get_api
 logging.basicConfig(
   filename='scheduler.log',
   filemode='a',
-  format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-  datefmt='%H:%M:%S',
+  format='%(asctime)s %(levelname)s %(message)s',
+  datefmt='"%Y-%m-%d %H:%M:%S',
   level=logging.INFO
 )
 
