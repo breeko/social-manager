@@ -1,61 +1,93 @@
 {% extends 'base.html' %}
 
-{% load crispy_forms_tags %}
+{% load render_table from django_tables2 %}
+
+{% block javascript %}	
+  <script>
+    $(document).ready(() => {
+      $("#delete_follow").click(() => {
+        const ids = []
+        const table = document.getElementById("follow_table");
+        table.querySelectorAll("input[type=checkbox]:checked").forEach(c => ids.push(c.getAttribute("value")));
+        if (ids.length > 0) {
+          $.ajax({
+              type: "POST",
+              url: "follow/delete",
+              data: { ids },
+              success: () => {
+                $("input:checkbox").prop('checked', false);
+                location.reload();
+              }
+          });
+        }
+          return false;
+        });
+        $("#reschedule_follow").click(() => {
+        const ids = []
+        const table = document.getElementById("follow_table");
+        table.querySelectorAll("input[type=checkbox]:checked").forEach(c => ids.push(c.getAttribute("value")));
+        if (ids.length > 0) {
+          $.ajax({
+              type: "POST",
+              url: "follow/reschedule",
+              data: { ids },
+              success: () => {
+                $("input:checkbox").prop('checked', false);
+                location.reload();
+              }
+          });
+        }
+          return false;
+        });
+        $("#delete_tweet").click(() => {
+          const ids = []
+          const table = document.getElementById("tweet_table");
+          table.querySelectorAll("input[type=checkbox]:checked").forEach(c => ids.push(c.getAttribute("value")));
+          if (ids.length > 0) {
+            $.ajax({
+                type: "POST",
+                url: "tweet/delete",
+                data: { ids },
+                success: () => {
+                  $("input:checkbox").prop('checked', false);
+                  location.reload();
+                }
+            });
+          }
+            return false;
+          });
+          $("#reschedule_tweet").click(() => {
+          const ids = []
+          const table = document.getElementById("tweet_table");
+          table.querySelectorAll("input[type=checkbox]:checked").forEach(c => ids.push(c.getAttribute("value")));
+          if (ids.length > 0) {
+            $.ajax({
+                type: "POST",
+                url: "tweet/reschedule",
+                data: { ids },
+                success: () => {
+                  $("input:checkbox").prop('checked', false);
+                  location.reload();
+                }
+            });
+          }
+            return false;
+          });
+    });
+  </script>	
+{% endblock %}
 
 {% block content %}
   <h3>Tweets</h3>
-  <table class="table">
-    <thead>
-      <tr class="sticky">
-        <th scope="action">Action</th>
-        <th scope="username">Username</th>
-        <th scope="body">Body</th>
-        <th scope="scheduled">Scheduled</th>
-        <th scope="sent">Sent</th>
-      </tr>
-    </thead>
-  {% for tweet in tweets %}
-    <tr>
-      <td style="display: contents;">
-        <span>
-          {% if tweet.sent == None %}
-            <a class="btn btn-sm" href="{% url 'twitter:edit_tweet' tweet.id %}">✏️</a>
-            <a class="btn btn-sm" href="{% url 'twitter:delete_tweet' tweet.id%}">🗑️</a>
-          {% endif %}
-      </span>
-      </td>
-      <td>{{tweet.user.username}}</td>
-      <td>{{tweet.body}}</td>
-      <td>{{tweet.scheduled}}</td>
-      <td>{{tweet.sent}}</td>
-    </tr>
-  {% endfor %}
-  </table>
+  
+  {% render_table tweets_table %}
+  <button id="reschedule_tweet" class="btn">Reschedule</button>
+  <button id="delete_tweet" class="btn btn-danger">Delete</button>
   <hr/>
   <h3>Follows</h3>
-  <table class="table">
-    <tr class="sticky">
-      <th>Action</th>
-      <th>User</th>
-      <th>To follow</th>
-      <th>Unfollow</th>
-      <th>Followed</th>
-      <th>Unfollowed</th>
-    </tr>
-    {% for f in follows %}
-      <tr>
-        <td>
-          <a class="btn btn-sm" href="{% url 'twitter:delete_follow' f.id%}">🗑️</a>
-        </td>
-        <td>{{ f.user }}</td>
-        <td>{{ f.username }}</td>
-        <td>{{ f.follow }}</td>
-        <td>{{ f.unfollow }}</td>
-        <td>{{ f.followed }}</td>
-        <td>{{ f.unfollowed }}</td>
-      </tr>
-    {% endfor %}
-  </table>
+  {% render_table follows_table %}
+  <button id="reschedule_follow" class="btn" name="reschedule">Reschedule</button>
+  <button id="delete_follow" class="btn btn-danger">Delete</button>
   <hr/>
 {% endblock %}
 

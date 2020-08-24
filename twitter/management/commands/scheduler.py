@@ -11,12 +11,13 @@ from tweepy.error import TweepError
 from twitter.models import Follow, Tweet
 from twitter.settings import settings
 from twitter.utils.twitter_utils import get_api
+from sqlite3 import OperationalError
 
 logging.basicConfig(
   filename='scheduler.log',
   filemode='a',
   format='%(asctime)s %(levelname)s %(message)s',
-  datefmt='"%Y-%m-%d %H:%M:%S',
+  datefmt='%Y-%m-%d %H:%M:%S',
   level=logging.INFO
 )
 
@@ -58,12 +59,17 @@ class Command(BaseCommand):
         except TweepError as err:
           logging.error("Failure to tweet: %s", err)
           tweet_sleep_until = now + timedelta(seconds=settings.scheduler.sleep_failure)
+        except OperationalError:
+          continue # database locked
       if now > follow_sleep_until:
         try:
           handle_follow()
         except TweepError as err:
           logging.error("Failure to tweet: %s", err)
           follow_sleep_until = now + timedelta(seconds=settings.scheduler.sleep_failure)
+        except OperationalError:
+          continue # database locked
+
       sleep(settings.scheduler.sleep)
 
 def handle_tweet():

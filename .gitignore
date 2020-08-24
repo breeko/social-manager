@@ -5,7 +5,7 @@
 settings.json
 secrets.json
 .vscode
-
+.metals
 ### Django ###
 *.log
 *.pot

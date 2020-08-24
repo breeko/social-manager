@@ -8,11 +8,11 @@ from django.urls import reverse
 from twitter.models import Tweet
 
 
-def edit_tweet(request, tweet_id: int):
+def edit_tweet(request, id: int):
   """ edits a tweet """
   template = loader.get_template('edit/index.html')
   form = EditTweetForm(request.POST)
-  instance = Tweet.objects.get(id=tweet_id)
+  instance = Tweet.objects.get(id=id)
   if request.method == "POST":
     form = EditTweetForm(request.POST, instance=instance)
     if form.is_valid():
@@ -22,7 +22,7 @@ def edit_tweet(request, tweet_id: int):
     form = EditTweetForm(instance=instance)
 
   context = {
-    'tweet_id': tweet_id,
+    'id': id,
     'form': form,
     'title': 'Edit'
   }
@@ -33,3 +33,6 @@ class EditTweetForm(forms.ModelForm):
   class Meta:
     model = Tweet
     fields = ('body', 'scheduled',)
+    widgets = {
+      'body': forms.Textarea(attrs={'rows': 4}),
+    }

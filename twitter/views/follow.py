@@ -1,5 +1,6 @@
 """ follow.py """
 from datetime import datetime, timedelta
+from random import random
 
 from django import forms
 from django.db.utils import IntegrityError
@@ -11,7 +12,7 @@ from twitter.models import Follow, User
 from twitter.settings import settings
 from twitter.utils.date_utils import format_date, read_date
 from twitter.utils.twitter_utils import create_valid_user, get_suggestions
-from random import random
+
 
 def get_unfollow_date():
   if settings.follow.unfollow_default_days is None:
@@ -113,4 +114,3 @@ def bulk_follow(request):
       if not Follow.objects.filter(username=to_follow).exists():
         Follow(username=to_follow, user=user, follow=follow_random, unfollow=unfollow_random).save()
   return HttpResponseRedirect(reverse('twitter:follow'))
-
