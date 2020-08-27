@@ -1,10 +1,8 @@
 """ manage.py """
-import json
 
 import django_tables2 as tables
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.template import loader
-from django.urls import reverse
 from django.utils.html import format_html
 
 from twitter.models import Follow, Tweet
@@ -51,10 +49,17 @@ def delete_follows(request):
 def reschedule_follows(request):
   """ Reschedules follows to occur this hour """
   ids = request.POST.getlist("ids[]", [])
+  # reschedule follows
   to_reschedule = Follow.objects.filter(id__in=ids, followed__isnull=True)
   for follow in to_reschedule:
     follow.follow = this_hour()
     follow.save()
+  # reschedule unfollows
+  to_reschedule = Follow.objects.filter(id__in=ids, followed__isnull=False, unfollow__isnull=True)
+  for follow in to_reschedule:
+    follow.unfollow = this_hour()
+    follow.save()
+
   return HttpResponse("{}", content_type='application/json')
 
 class TweetTable(tables.Table):
