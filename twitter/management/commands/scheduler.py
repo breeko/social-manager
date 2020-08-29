@@ -11,15 +11,23 @@ from tweepy.error import TweepError
 
 from twitter.models import Follow, Tweet
 from twitter.settings import settings
+from twitter.utils.date_utils import format_date
 from twitter.utils.twitter_utils import get_api
 
+LOGGING_PATH = "logs/scheduler/scheduler.log"
+STATUS_PATH = "logs/scheduler/status.log"
+
 logging.basicConfig(
-  filename='logs/scheduler/scheduler.log',
+  filename=LOGGING_PATH,
   filemode='a',
   format='%(asctime)s %(levelname)s %(message)s',
   datefmt='%Y-%m-%d %H:%M:%S',
   level=logging.INFO
 )
+
+def write_last_run(now: datetime):
+  with open(STATUS_PATH, "w") as f:
+    f.write(format_date(now))
 
 def process_tweet(tweet: Tweet, debug: bool):
   """ Processes user tweets """
@@ -52,7 +60,6 @@ class Command(BaseCommand):
   """ Runs tweet schedule """
   help = """Runs tweet schedule. You can set settings in settings.py """
   def add_arguments(self, parser):
-    # Named (optional) arguments
     parser.add_argument(
       '--debug',
       action='store_true',
@@ -64,6 +71,7 @@ class Command(BaseCommand):
     follow_sleep_until = datetime.min
     while True:
       now = datetime.now()
+      write_last_run(now)
       if now > tweet_sleep_until:
         try:
           handle_tweet(debug)

@@ -3,6 +3,25 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-3">
+        Current Time
+      </div>
+      <div class="col-3">
+        {% now 'Y-m-d H:i' %}
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-3">
+        Last heartbeart
+      </div>
+      <div class="col-3">
+        {{ status }}
+      </div>
+    </div>
+  </div>
+  <hr/>
   {% for log in logs %}
     <p>{{log}}</p>
   {% endfor %}

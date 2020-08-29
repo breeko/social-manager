@@ -7,7 +7,8 @@
     const createOnClick = ({id, table, url}) => {
       $(`#${id}`).click(() => {
         const ids = []
-        const t = document.getElementById(table);
+        const t = document.getElementById(table)
+        const withinHours = $(`input#${id}_hours`).val()
         t.querySelectorAll("input[type=checkbox]:checked").forEach(c => {
           const value = c.getAttribute("value")
           value && ids.push(value)
@@ -16,7 +17,7 @@
           $.ajax({
               type: "POST",
               url,
-              data: { ids },
+              data: { ids, withinHours },
               success: () => {
                 $("input:checkbox").prop('checked', false);
                 location.reload();
@@ -39,13 +40,17 @@
   <h3>Tweets</h3>
   
   {% render_table tweets_table %}
-  <button id="reschedule_tweet" class="btn">Reschedule</button>
   <button id="delete_tweet" class="btn btn-danger">Delete</button>
+  <button id="reschedule_tweet" class="btn">Reschedule</button>
+  <span>Within hours:</span>
+  <input id="reschedule_tweet_hours" value="1" type="number" type="number" step="0.01">
   <hr/>
   <h3>Follows</h3>
   {% render_table follows_table %}
-  <button id="reschedule_follow" class="btn" name="reschedule">Reschedule</button>
   <button id="delete_follow" class="btn btn-danger">Delete</button>
+  <button id="reschedule_follow" class="btn" name="reschedule">Reschedule</button>
+  <span>Within hours:</span>
+  <input id="reschedule_follow_hours" value="1" type="number" step="0.01">
   <hr/>
 {% endblock %}
 
