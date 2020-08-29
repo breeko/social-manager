@@ -70,7 +70,7 @@ class Command(BaseCommand):
     tweet_sleep_until = datetime.min
     follow_sleep_until = datetime.min
     while True:
-      now = datetime.now()
+      now = timezone.now()
       write_last_run(now)
       if now > tweet_sleep_until:
         try:
