@@ -67,12 +67,12 @@ class Command(BaseCommand):
     )
   def handle(self, *args, **options):
     debug = options.get('debug', False)
-    tweet_sleep_until = datetime.min
-    follow_sleep_until = datetime.min
+    tweet_sleep_until = None
+    follow_sleep_until = None
     while True:
       now = timezone.now()
       write_last_run(now)
-      if now > tweet_sleep_until:
+      if tweet_sleep_until is None or now > tweet_sleep_until:
         try:
           handle_tweet(debug)
         except TweepError as err:
@@ -80,7 +80,7 @@ class Command(BaseCommand):
           tweet_sleep_until = now + timedelta(seconds=settings.scheduler.sleep_failure)
         except OperationalError:
           continue # database locked
-      if now > follow_sleep_until:
+      if follow_sleep_until is None or now > follow_sleep_until:
         try:
           handle_follow(debug)
         except TweepError as err:
