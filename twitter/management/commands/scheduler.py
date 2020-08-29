@@ -25,6 +25,13 @@ logging.basicConfig(
   level=logging.INFO
 )
 
+def user_exists(api, user):
+  try:
+    api.get_user(user)
+    return True
+  except TweepError:
+    return False
+
 def write_last_run(now: datetime):
   with open(STATUS_PATH, "w") as f:
     f.write(format_date(now))
@@ -42,7 +49,8 @@ def process_follow(follow: Follow, debug: bool):
   """ Processes user follows """
   if not debug:
     api = get_api(follow.user)
-    api.create_friendship(screen_name=follow.username)
+    if user_exists(api, follow.username):
+      api.create_friendship(screen_name=follow.username)
   follow.followed = timezone.localtime()
   follow.save(update_fields=['followed'])
   logging.info("[%s]: followed %s", follow.user.username, follow.username)
@@ -51,7 +59,8 @@ def process_unfollow(follow: Follow, debug: bool):
   """ Processes user unfollows """
   if not debug:
     api = get_api(follow.user)
-    api.destroy_friendship(screen_name=follow.username)
+    if user_exists(api, follow.username):
+      api.destroy_friendship(screen_name=follow.username)
   follow.unfollowed = timezone.localtime()
   follow.save(update_fields=['unfollowed'])
   logging.info("[%s]: unfollowed %s", follow.user.username, follow.username)
