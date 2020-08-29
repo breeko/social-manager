@@ -35,6 +35,7 @@ def reschedule_tweets(request):
   ids = request.POST.getlist("ids[]", [])
   to_reschedule = Tweet.objects.filter(id__in=ids, sent__isnull=True)
   within_hours = request.POST.get("withinHours")
+  print(request.POST)
   hours = float(within_hours)
 
   for tweet in to_reschedule:
@@ -61,7 +62,7 @@ def reschedule_follows(request):
   # reschedule unfollows
   to_reschedule = Follow.objects.filter(id__in=ids, followed__isnull=False, unfollowed__isnull=True)
   for follow in to_reschedule:
-    follow.unfollow = this_hour()
+    follow.unfollow = this_hour(hours)
     follow.save()
 
   return HttpResponse("{}", content_type='application/json')
