@@ -7,6 +7,7 @@ from django.db.utils import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
+from django.utils import timezone
 
 from twitter.models import Follow, User
 from twitter.settings import settings
@@ -16,8 +17,8 @@ from twitter.utils.twitter_utils import create_valid_user, get_suggestions
 
 def get_unfollow_date():
   if settings.follow.unfollow_default_days is None:
-    return None 
-  return format_date(datetime.now() + timedelta(days=settings.follow.unfollow_default_days))
+    return None
+  return format_date(timezone.localtime() + timedelta(days=settings.follow.unfollow_default_days))
 
 def follow(request):
   """ form to generate follows """
@@ -81,7 +82,7 @@ def follow(request):
 class BulkFollowForm(forms.Form):
   users = forms.CharField(label="Users", widget=forms.Textarea(attrs={"rows": 5, "cols": 20}))
   unfollow = forms.DateField(label="Unfollow", required=False)
-  
+
 BulkFollowFormDefaults = {
   "unfollow": get_unfollow_date()
 }
@@ -98,7 +99,7 @@ class FollowTweetForm(forms.Form):
   since = forms.DateField(label="Since", required=True)
 
 FollowTweetFormDefaults = {
-  "since": datetime.now() - timedelta(days=1),
+  "since": timezone.localtime() - timedelta(days=1),
   "blacklist": settings.follow.default_blacklist
 }
 
@@ -110,7 +111,7 @@ def bulk_follow(request):
     for u in request.POST.get('users').split("\n"):
       to_follow = u.strip()
       unfollow_random = read_date(unfollow) + timedelta(hours=random())
-      follow_random = datetime.now() + timedelta(hours=random())
+      follow_random = timezone.localtime() + timedelta(hours=random())
       if not Follow.objects.filter(username=to_follow).exists():
         Follow(username=to_follow, user=user, follow=follow_random, unfollow=unfollow_random).save()
   return HttpResponseRedirect(reverse('twitter:follow'))

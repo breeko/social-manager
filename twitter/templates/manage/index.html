@@ -4,76 +4,34 @@
 
 {% block javascript %}	
   <script>
+    const createOnClick = ({id, table, url}) => {
+      $(`#${id}`).click(() => {
+        const ids = []
+        const t = document.getElementById(table);
+        t.querySelectorAll("input[type=checkbox]:checked").forEach(c => {
+          const value = c.getAttribute("value")
+          value && ids.push(value)
+        });
+        if (ids.length > 0) {
+          $.ajax({
+              type: "POST",
+              url,
+              data: { ids },
+              success: () => {
+                $("input:checkbox").prop('checked', false);
+                location.reload();
+              }
+          });
+        }
+          return false;
+        });
+    };
     $(document).ready(() => {
-      $("#delete_follow").click(() => {
-        const ids = []
-        const table = document.getElementById("follow_table");
-        table.querySelectorAll("input[type=checkbox]:checked").forEach(c => ids.push(c.getAttribute("value")));
-        if (ids.length > 0) {
-          $.ajax({
-              type: "POST",
-              url: "follow/delete",
-              data: { ids },
-              success: () => {
-                $("input:checkbox").prop('checked', false);
-                location.reload();
-              }
-          });
-        }
-          return false;
-        });
-        $("#reschedule_follow").click(() => {
-        const ids = []
-        const table = document.getElementById("follow_table");
-        table.querySelectorAll("input[type=checkbox]:checked").forEach(c => ids.push(c.getAttribute("value")));
-        if (ids.length > 0) {
-          $.ajax({
-              type: "POST",
-              url: "follow/reschedule",
-              data: { ids },
-              success: () => {
-                $("input:checkbox").prop('checked', false);
-                location.reload();
-              }
-          });
-        }
-          return false;
-        });
-        $("#delete_tweet").click(() => {
-          const ids = []
-          const table = document.getElementById("tweet_table");
-          table.querySelectorAll("input[type=checkbox]:checked").forEach(c => ids.push(c.getAttribute("value")));
-          if (ids.length > 0) {
-            $.ajax({
-                type: "POST",
-                url: "tweet/delete",
-                data: { ids },
-                success: () => {
-                  $("input:checkbox").prop('checked', false);
-                  location.reload();
-                }
-            });
-          }
-            return false;
-          });
-          $("#reschedule_tweet").click(() => {
-          const ids = []
-          const table = document.getElementById("tweet_table");
-          table.querySelectorAll("input[type=checkbox]:checked").forEach(c => ids.push(c.getAttribute("value")));
-          if (ids.length > 0) {
-            $.ajax({
-                type: "POST",
-                url: "tweet/reschedule",
-                data: { ids },
-                success: () => {
-                  $("input:checkbox").prop('checked', false);
-                  location.reload();
-                }
-            });
-          }
-            return false;
-          });
-    });
+      createOnClick({id: "delete_follow", table: "follow_table", url: "follow/delete"});
+      createOnClick({id: "reschedule_follow", table: "follow_table", url: "follow/reschedule"});
+      createOnClick({id: "delete_tweet", table: "tweet_table", url: "tweet/delete"});
+      createOnClick({id: "reschedule_tweet", table: "tweet_table", url: "tweet/reschedule"});
+    })
   </script>	
 {% endblock %}
 

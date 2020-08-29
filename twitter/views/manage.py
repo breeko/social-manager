@@ -3,7 +3,6 @@
 import django_tables2 as tables
 from django.http import HttpResponse
 from django.template import loader
-from django.utils.html import format_html
 
 from twitter.models import Follow, Tweet
 from twitter.utils.date_utils import this_hour
@@ -55,7 +54,7 @@ def reschedule_follows(request):
     follow.follow = this_hour()
     follow.save()
   # reschedule unfollows
-  to_reschedule = Follow.objects.filter(id__in=ids, followed__isnull=False, unfollow__isnull=True)
+  to_reschedule = Follow.objects.filter(id__in=ids, followed__isnull=False, unfollowed__isnull=True)
   for follow in to_reschedule:
     follow.unfollow = this_hour()
     follow.save()
@@ -63,31 +62,20 @@ def reschedule_follows(request):
   return HttpResponse("{}", content_type='application/json')
 
 class TweetTable(tables.Table):
-  action = tables.Column(orderable=False, empty_values=())
+  tweet_selection = tables.CheckBoxColumn(accessor="pk", attrs={"th__input": {"onclick": "toggle('tweet_selection', this)"}}, orderable=False)
   user = tables.Column()
   body = tables.Column()
   scheduled = tables.Column()
   sent = tables.Column()
-  def render_action(self, value, record):
-    return format_html(f"""
-      <span>
-        <input type="checkbox" value="{record.id}">
-      </span>
-    """, value, record.id)
   class Meta:
     attrs = {"id": "tweet_table"}
 
-
 class FollowTable(tables.Table):
-
-  action = tables.Column(orderable=False, empty_values=())
+  follow_selection = tables.CheckBoxColumn(accessor="pk", attrs={"th__input": {"onclick": "toggle('follow_selection', this)"}}, orderable=False)
   username = tables.Column()
   follow = tables.Column()
   unfollow = tables.Column()
   followed = tables.Column()
   unfollowed = tables.Column()
-
-  def render_action(self, value, record):
-    return format_html(f"""<input type="checkbox" value="{record.id}">""", value, record.id)
   class Meta:
     attrs = {"id": "follow_table"}

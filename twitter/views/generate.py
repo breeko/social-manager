@@ -3,6 +3,7 @@ from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
+from django.utils import timezone
 
 from twitter.models import Tweet, User
 from twitter.settings import settings
@@ -46,8 +47,8 @@ def generate(request):
         tweet.save()
       suggestions = []
 
-  generate_form = GenerateTweetForm(initial=GenerateTweetFormDefaults)
-  create_form = CreateTweetForm(initial=CreateTweetFormDefaults)
+  generate_form = GenerateTweetForm()
+  create_form = CreateTweetForm()
 
   user_names = [u.username for u in User.objects.all()]
   context = {
@@ -55,15 +56,11 @@ def generate(request):
     'generate_form': generate_form,
     'suggestions': suggestions,
     'title': 'Generate',
-    'now': format_date(),
     'trends': trends,
     'user_names': user_names
   }
   return HttpResponse(template.render(context, request))
 
-CreateTweetFormDefaults = {
-  'scheduled': format_date()
-}
 class CreateTweetForm(forms.ModelForm):
   """ Form for creating a tweet"""
   class Meta:
@@ -72,10 +69,6 @@ class CreateTweetForm(forms.ModelForm):
     widgets = {
       'body': forms.Textarea(attrs={'rows': 4}),
     }
-
-GenerateTweetFormDefaults = {
-  'scheduled': format_date()
-}
 
 class GenerateTweetForm(forms.Form):
   """ Form to generate tweets """
