@@ -42,7 +42,7 @@ def process_follow(follow: Follow, debug: bool):
   """ Processes user follows """
   if not debug:
     api = get_api(follow.user)
-    api.create_friendship(follow.username)
+    api.create_friendship(screen_name=follow.username)
   follow.followed = timezone.localtime()
   follow.save(update_fields=['followed'])
   logging.info("[%s]: followed %s", follow.user.username, follow.username)
@@ -51,7 +51,7 @@ def process_unfollow(follow: Follow, debug: bool):
   """ Processes user unfollows """
   if not debug:
     api = get_api(follow.user)
-    api.destroy_friendship(follow.username)
+    api.destroy_friendship(screen_name=follow.username)
   follow.unfollowed = timezone.localtime()
   follow.save(update_fields=['unfollowed'])
   logging.info("[%s]: unfollowed %s", follow.user.username, follow.username)
@@ -84,7 +84,7 @@ class Command(BaseCommand):
         try:
           handle_follow(debug)
         except TweepError as err:
-          logging.error("Failure to tweet: %s", err)
+          logging.error("Failure to follow: %s", err)
           follow_sleep_until = now + timedelta(seconds=settings.scheduler.sleep_failure)
         except OperationalError:
           continue # database locked
