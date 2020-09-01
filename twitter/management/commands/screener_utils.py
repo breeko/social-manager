@@ -1,4 +1,25 @@
 """ screener_utils .py """
+from time import sleep
+
+import tweepy
+
+
+def get_overlap(api: tweepy.API, name: str) -> float:
+  """ Returns the """
+  friends = set()
+  followers = set()
+  for page in tweepy.Cursor(api.friends_ids, screen_name=name).pages():
+    friends = friends | set(page)
+    sleep(5)
+  for page in tweepy.Cursor(api.followers_ids, screen_name=name).pages():
+    followers = followers | set(page)
+    sleep(5)
+  if len(followers) == 0:
+    return 0
+  score = len(followers.intersection(friends)) / len(followers)
+  return score
+
+
 def flatten_dict(init, lkey=''):
   """ Flattens a dictionary, ignoring nested lists
   e.g. f({a: {b: 1, c: [2, 3]}, d: 4}) => {a_b: 1, a_c: [...], d: 4}

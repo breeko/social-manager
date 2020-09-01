@@ -105,7 +105,7 @@ def handle_tweet(debug: bool):
   """ Handles user tweets """
   offset = timezone.timedelta(seconds=settings.scheduler.precision)
   now = timezone.localtime()
-  start = now - offset
+  start = now
   end = now + offset
   tweets = Tweet.objects.filter(scheduled__gte=start, scheduled__lte=end, sent__isnull=True)
   for tweet in tweets:
