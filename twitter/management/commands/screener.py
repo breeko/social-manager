@@ -1,10 +1,9 @@
 """screener.py"""
-import collections
 import csv
 import os
 from collections import namedtuple
-from typing import List
 
+import geocoder
 import tweepy
 from django.core.management.base import BaseCommand
 from urllib3.exceptions import ProtocolError
@@ -73,7 +72,7 @@ class MyStreamListener(tweepy.StreamListener):
   def on_error(self, status_code):
     if status_code == 420:
       # returning False in on_error disconnects the stream
-      return False
+      return True
 
 class Command(BaseCommand):
   """ Screens hashtags and saves users locally """
@@ -81,7 +80,7 @@ class Command(BaseCommand):
 
   def add_arguments(self, parser):
     parser.add_argument("username", help="Username")
-    parser.add_argument("hashtags", type=str, nargs="+", help="Hashtags to follow")
+    parser.add_argument("locations", type=str, nargs="+", help="Locations to filter")
     parser.add_argument("-o", "--out", dest="out_path", default="screener.csv", help="Output path")
     parser.add_argument("--min-friends", type=int, dest="min_friends", default=100, help="Min number of friends")
     parser.add_argument("--max-friends", type=int, dest="max_friends", default=1000, help="Max number of friends")
@@ -90,7 +89,7 @@ class Command(BaseCommand):
 
   def handle(self, *args, **options):
     username = options["username"]
-    hashtags = options["hashtags"]
+    locations = options["locations"]
     out_path = options["out_path"]
     user_filter = UserFilter(
       min_friends=options["min_friends"],
@@ -103,12 +102,21 @@ class Command(BaseCommand):
     botometer = get_botometer(user)
     stream_listener = MyStreamListener(out_path=out_path, user_filter=user_filter, api=api, botometer=botometer)
 
+    coords = []
+    print(locations)
+
+    for location in locations:
+      res = geocoder.osm(location).json
+      if res:
+        # [long, lat]
+        coord = res['bbox']['southwest'][::-1] + res['bbox']['northeast'][::-1]
+        coords.extend(coord)
+    print(coords)
     while True:
       try:
         stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
-        stream.filter(track=hashtags)
+        stream.filter(locations=coords)
       except ProtocolError:
         continue
       except (KeyboardInterrupt, SystemExit):
         return
-
