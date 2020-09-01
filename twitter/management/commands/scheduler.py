@@ -74,13 +74,14 @@ class Command(BaseCommand):
       action='store_true',
       help="Run in debug mode, don't actually tweet, follow or unfollow",
     )
+
   def handle(self, *args, **options):
     debug = options.get('debug', False)
     tweet_sleep_until = None
     follow_sleep_until = None
     while True:
       now = timezone.now()
-      write_last_run(now)
+      write_last_run(timezone.now())
       if tweet_sleep_until is None or now > tweet_sleep_until:
         try:
           handle_tweet(debug)

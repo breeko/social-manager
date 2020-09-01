@@ -3,17 +3,29 @@
 import django_tables2 as tables
 from django.http import HttpResponse
 from django.template import loader
+from django_tables2 import A
 
 from twitter.models import Follow, Tweet
 from twitter.utils.date_utils import this_hour
 
 
+def get_order_by(order_by):
+  tweet_default = "scheduled"
+  follow_default = "unfollow"
+  tweet_fields = [f.name for f in Tweet._meta.get_fields()]
+  follow_fields = [f.name for f in Follow._meta.get_fields()]
+  if order_by in tweet_fields:
+    return (order_by, follow_default)
+  elif order_by in follow_fields:
+    return (tweet_default, order_by)
+  return (tweet_default, follow_default)
+
 def manage(request):
   """ view for twitter/manage """
   template = loader.get_template('manage/index.html')
-  tweets = Tweet.objects.filter(sent__isnull=True)
+  tweets = Tweet.objects.filter(sent__isnull=True).order_by("scheduled")
   tweets_table = TweetTable(tweets)
-  follows = Follow.objects.filter(unfollowed__isnull=True).order_by(request.GET.get("sort", "-follow"))
+  follows = Follow.objects.filter(unfollowed__isnull=True).order_by("-follow")
   follows_table = FollowTable(follows).paginate(page=request.GET.get("page", 1), per_page=10)
 
   context = {
@@ -69,19 +81,22 @@ def reschedule_follows(request):
 
 class TweetTable(tables.Table):
   tweet_selection = tables.CheckBoxColumn(accessor="pk", attrs={"th__input": {"onclick": "toggle('tweet_selection', this)"}}, orderable=False)
-  user = tables.Column()
-  body = tables.Column()
-  scheduled = tables.Column()
-  sent = tables.Column()
+  edit = tables.LinkColumn('twitter:edit_tweet', text='✏️', args=[A('pk')], orderable=False, empty_values=())
+  user = tables.Column(orderable=False)
+  body = tables.Column(orderable=False)
+  scheduled = tables.Column(orderable=False)
+  sent = tables.Column(orderable=False)
   class Meta:
     attrs = {"id": "tweet_table"}
 
 class FollowTable(tables.Table):
   follow_selection = tables.CheckBoxColumn(accessor="pk", attrs={"th__input": {"onclick": "toggle('follow_selection', this)"}}, orderable=False)
-  username = tables.Column()
-  follow = tables.Column()
-  unfollow = tables.Column()
-  followed = tables.Column()
-  unfollowed = tables.Column()
+  edit = tables.LinkColumn('twitter:edit_follow', text='✏️', args=[A('pk')], orderable=False, empty_values=())
+  username = tables.Column(orderable=False)
+  follow = tables.Column(orderable=False)
+  unfollow = tables.Column(orderable=False)
+  followed = tables.Column(orderable=False)
+  unfollowed = tables.Column(orderable=False)
+
   class Meta:
     attrs = {"id": "follow_table"}

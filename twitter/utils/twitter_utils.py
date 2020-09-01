@@ -4,9 +4,11 @@ from typing import Callable, List
 
 import requests
 import tweepy
+from botometer import Botometer
 from bs4 import BeautifulSoup
 from requests.utils import quote
 from tweepy.api import API
+
 from twitter.utils.parse_utils import build_expr
 
 MODEL_CHOICES = (
@@ -36,8 +38,8 @@ def generate_html(phrase: str) -> str:
 def generate_hugging_face(phrase: str, model: str) -> str:
   """ valid models: gpt2, gpt2-xl, gpt2-large, gpt2-medium"""
   headers = {
-      'Authorization': 'Bearer YOUR_ORG_OR_USER_API_TOKEN',
-      'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_ORG_OR_USER_API_TOKEN',
+    'Content-Type': 'application/json',
   }
   data = f'"{phrase}"'
   raw = requests.post(f'https://api-inference.huggingface.co/models/{model}', headers=headers, data=data)
@@ -52,8 +54,21 @@ def get_api(user: 'User') -> API:
   """ Returns an api object based on user credentials """
   auth = tweepy.OAuthHandler(user.api_key, user.api_secret)
   auth.set_access_token(user.api_access_token, user.api_token_secret)
-  api = tweepy.API(auth)
+  api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
   return api
+
+def get_botometer(user: 'User') -> Botometer:
+  """ Returns an api object based on user credentials """
+  if user.rapidapi_key is None:
+    return None
+  botometer = Botometer(
+    consumer_key=user.api_key,
+    consumer_secret=user.api_secret,
+    access_token=user.api_access_token,
+    access_token_secret=user.api_token_secret,
+    rapidapi_key=user.rapidapi_key
+  )
+  return botometer
 
 def get_trends(user: 'User', geo_code: int = 23424977) -> List[str]:
   """ Returns trends in a given geo-code (default US) """

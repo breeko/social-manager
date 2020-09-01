@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+{% load twitter_extras %}
+
+{% block content %}
+  <h3>Current Users</h3>
+    {% for u in users %}
+      {% with u.id as id %}
+      <p><a href="{% url 'twitter:edit_user' id=u.id %}">✏️</a> {{u}}</p>
+      {% endwith %}
+    {% endfor %}
+  <hr class="solid">
+  <h3>Create</h3>
+  {% if error != '' %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
+  {% if id != None %}
+    <form action="{% url 'twitter:edit_user' id=id %}" method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button class="btn">
+        <a href="{% url 'twitter:user' %}">Clear</a>
+      </button>
+      <button type="submit" name="edit" class="btn btn-primary">Save</button>
+    </form>
+  {% else %}
+    <form action="{% url 'twitter:user' %}" method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button type="submit" name="create" class="btn btn-primary">Create</button>
+    </form>
+  {% endif %}
+  {% endblock %}

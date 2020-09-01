@@ -1,8 +1,10 @@
 """ __init__.py """
 from twitter.views.index import *
 from twitter.views.manage import *
-from twitter.views.users import *
-from twitter.views.edit import *
+from twitter.views.user import *
+from twitter.views.edit_tweet import *
+from twitter.views.user import *
+from twitter.views.edit_follow import *
 from twitter.views.generate import *
 from twitter.views.follow import *
 from twitter.views.news import *
