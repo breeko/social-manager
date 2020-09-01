@@ -9,7 +9,7 @@
   <form action="{% url 'twitter:news' %}" method="post">
     {% csrf_token %}
     {{ form|crispy }}
-    <button type="submit" class="btn btn-primary" name="generate">Generate</button>
+    <button type="submit" class="btn btn-primary" name="create">Create</button>
     {% if suggestions|length > 0 %}
       <button type="submit" class="btn btn-success" name="save">Save</button>
     {% endif %}

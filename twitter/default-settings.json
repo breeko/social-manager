@@ -14,10 +14,6 @@
     "num_suggestions": 50
   },
 
-  "Generate": {
-    "num_suggestions": 2
-  },
-
   "News": {
     "default_sources": "nytimes.com",
     "default_topic": "news"

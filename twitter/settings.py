@@ -42,14 +42,6 @@ class FollowSettings:
     # commas separated list of words to exclude when generating follow suggestions
     self.default_blacklist = settings_d.get("default_blacklist")
 
-class GenerateSettings:
-  """ Settings for manage.py """
-  def __init__(self, d):
-    settings_d = d.get('Generate', {})
-
-    # number of  tweet suggestions to generate
-    self.num_suggestions = settings_d.get("num_suggestions")
-
 class NewsSettings:
   """ Settings for news.py """
   def __init__(self, d):
@@ -69,7 +61,6 @@ class SettingsClass:
     self.scheduler = SchedulerSettings(self.inner)
     self.manage = ManageSettings(self.inner)
     self.follow = FollowSettings(self.inner)
-    self.generate = GenerateSettings(self.inner)
     self.news = NewsSettings(self.inner)
 
 settings = SettingsClass()

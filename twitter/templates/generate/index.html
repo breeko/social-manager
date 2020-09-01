@@ -15,56 +15,8 @@
     <button type="submit" class="btn btn-primary" value="create">Create</button>
   </form>
   <hr class="solid">
-  <h3>Auto Generate</h3>
-  <form action="{% url 'twitter:generate' %}" method="post">
-    {% csrf_token %}
-    {{ generate_form|crispy }}
-    <button type="submit" class="btn btn-primary" name="generate">Generate</button>
-    {% if suggestions|length > 0 %}
-      <button type="submit" class="btn btn-success" name="save">Save</button>
-    {% endif %}
-    <hr/>
-    <h3>Suggestions</h3>
-    <table class="table">
-      <tr class="sticky">
-        <th>Save</th>
-        <th>Body</th>
-        <th>Schedule</th>
-        <th>User</th>
-      </tr>
-      {% for s in suggestions %}
-        <tr>
-          <td>
-            {% with "check:"|addstr:forloop.counter0 as name %}
-              <input type="checkbox" name="{{name}}">
-            {% endwith %}
-          </td>
-          <td>
-            {% with "body:"|addstr:forloop.counter0 as name %}
-              <textarea rows="4" cols="80" name="{{name}}">{{s}}</textarea>
-            {% endwith %}
-          </td>
-          <td>
-            {% with "schedule:"|addstr:forloop.counter0 as name %}
-              <input name="{{name}}" value="{% now 'Y-m-d H:i' %}">
-            {% endwith %}
-          </td>
-          <td>
-            {% with "user:"|addstr:forloop.counter0 as name %}
-              <select name="{{name}}">
-                {% for u in user_names %}
-                  <option value="{{u}}">{{u}}</option>
-                {% endfor %}
-              </select>
-            {% endwith %}
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
-    <hr/>
-    <h3>Trends</h3>
-    {% for t in trends %}
-      <button type="submit" class="btn btn-sm btn-outline-dark" name="trend" value="{{t}}">{{t}}</button>
-    {% endfor %}
-  </form>
+  <h3>Trends</h3>
+  {% for t in trends %}
+    <button type="submit" class="btn btn-sm btn-outline-dark" name="trend" value="{{t}}">{{t}}</button>
+  {% endfor %}
 {% endblock %}

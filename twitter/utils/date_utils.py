@@ -13,6 +13,6 @@ def read_date(date: str) -> 'datetime':
   """ Converts a string to a date """
   return datetime.strptime(date, DATE_FORMAT)
 
-def this_hour(hours: float = 1.0) -> 'datetime':
+def within_hour(hours: float = 1.0) -> 'datetime':
   """ Returns a datetime object that's within in the next hour """
   return timezone.localtime() + timedelta(hours=random() * hours)

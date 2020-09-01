@@ -4,32 +4,37 @@ from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 
 from twitter.models import Tweet
 
 
-def edit_tweet(request, id: int):
+def create(request, id: int = None):
   """ edits a tweet """
-  template = loader.get_template("edit/index.html")
-  form = EditTweetForm(request.POST)
-  instance = Tweet.objects.get(id=id)
+  template = loader.get_template("create/index.html")
+  form = CreateTweetForm(request.POST)
+  instance = None
+  if id is not None:
+    instance = get_object_or_404(Tweet, id=id)
+
   if request.method == "POST":
-    form = EditTweetForm(request.POST, instance=instance)
+    form = CreateTweetForm(request.POST, instance=instance)
     if form.is_valid():
       form.save(commit=True)
+      if id is None:
+        return HttpResponseRedirect(reverse("twitter:create"))
       return HttpResponseRedirect(reverse("twitter:manage"))
   else:
-    form = EditTweetForm(instance=instance)
+    form = CreateTweetForm(instance=instance)
 
   context = {
     "id": id,
     "form": form,
-    "title": "Edit Tweet",
-    "path": "twitter:edit_tweet"
+    "title": "Create" if id is None else "Edit"
   }
   return HttpResponse(template.render(context, request))
 
-class EditTweetForm(forms.ModelForm):
+class CreateTweetForm(forms.ModelForm):
   """ Form to edit a scheduled tweet """
   class Meta:
     model = Tweet

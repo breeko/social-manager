@@ -6,7 +6,7 @@ from django.template import loader
 from django_tables2 import A
 
 from twitter.models import Follow, Tweet
-from twitter.utils.date_utils import this_hour
+from twitter.utils.date_utils import within_hour
 
 
 def get_order_by(order_by):
@@ -51,7 +51,7 @@ def reschedule_tweets(request):
   hours = float(within_hours)
 
   for tweet in to_reschedule:
-    tweet.scheduled = this_hour(hours)
+    tweet.scheduled = within_hour(hours)
     tweet.save()
   return HttpResponse("{}", content_type='application/json')
 
@@ -69,12 +69,12 @@ def reschedule_follows(request):
   within_hours = request.POST.get("withinHours")
   hours = float(within_hours)
   for follow in to_reschedule:
-    follow.follow = this_hour(hours)
+    follow.follow = within_hour(hours)
     follow.save()
   # reschedule unfollows
   to_reschedule = Follow.objects.filter(id__in=ids, followed__isnull=False, unfollowed__isnull=True)
   for follow in to_reschedule:
-    follow.unfollow = this_hour(hours)
+    follow.unfollow = within_hour(hours)
     follow.save()
 
   return HttpResponse("{}", content_type='application/json')
