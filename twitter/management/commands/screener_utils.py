@@ -30,12 +30,10 @@ def flatten_dict(init, lkey=''):
     if isinstance(val, dict):
       ret.update(flatten_dict(val, key+'_'))
     elif isinstance(val, list):
-      ret[key] = "[...]"
+      ret[key] = f"[list of {len(val)}]"
     else:
       ret[key] = val
   return ret
-
-""" orderings.py """
 
 column_orderings = [
   "id",

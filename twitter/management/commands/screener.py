@@ -53,14 +53,14 @@ class MyStreamListener(tweepy.StreamListener):
     return [english, universal, content, friend, network, sentiment, temporal, user]
 
   def on_status(self, status):
-    user = status.user
-    name = user.screen_name
+    name = status.user.screen_name
     if name not in self._seen and \
-        user.followers_count >= self.user_filter.min_followers and \
-        user.followers_count <= self.user_filter.max_followers and \
-        user.friends_count >= self.user_filter.min_friends and \
-        user.friends_count <= self.user_filter.max_friends:
+        status.user.followers_count >= self.user_filter.min_followers and \
+        status.user.followers_count <= self.user_filter.max_followers and \
+        status.user.friends_count >= self.user_filter.min_friends and \
+        status.user.friends_count <= self.user_filter.max_friends:
       overlap = get_overlap(self.api, name)
+      user = self.api.get_user(name)
       with open(self.out_path, "a+") as csv_file:
         writer = csv.writer(csv_file)
         boto_results = self._get_boto_results(user.screen_name)
