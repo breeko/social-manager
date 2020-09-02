@@ -1,6 +1,7 @@
 """ date_utils.py """
 from datetime import datetime, timedelta
 from random import random
+
 from django.utils import timezone
 
 DATE_FORMAT = "%Y-%m-%d %H:%M"
@@ -13,6 +14,6 @@ def read_date(date: str) -> 'datetime':
   """ Converts a string to a date """
   return datetime.strptime(date, DATE_FORMAT)
 
-def within_hour(hours: float = 1.0) -> 'datetime':
+def within_hour(dt: datetime = timezone.localtime(), hours: float = 1.0) -> 'datetime':
   """ Returns a datetime object that's within in the next hour """
-  return timezone.localtime() + timedelta(hours=random() * hours)
+  return dt + timedelta(hours=random() * hours)

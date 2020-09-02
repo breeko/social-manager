@@ -43,14 +43,14 @@
   <button id="delete_tweet" class="btn btn-danger">Delete</button>
   <button id="reschedule_tweet" class="btn">Reschedule</button>
   <span>Within hours:</span>
-  <input id="reschedule_tweet_hours" value="1" type="number" type="number" step="0.01">
+  <input id="reschedule_tweet_hours" value="1.00" type="number" type="number" step="0.01">
   <hr/>
   <h3>Follows</h3>
   {% render_table follows_table %}
   <button id="delete_follow" class="btn btn-danger">Delete</button>
   <button id="reschedule_follow" class="btn" name="reschedule">Reschedule</button>
   <span>Within hours:</span>
-  <input id="reschedule_follow_hours" value="1" type="number" step="0.01">
+  <input id="reschedule_follow_hours" value="1.00" type="number" step="0.01">
   <hr/>
 {% endblock %}
 

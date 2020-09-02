@@ -14,8 +14,8 @@ from twitter.utils.date_utils import format_date
 def news(request):
   """ view for /twitter/news """
   template = loader.get_template('news/index.html')
+  suggestions = []
   if request.method == "GET":
-    suggestions = []
     form = GenerateNewsForm(initial={'sources': settings.news.default_sources, 'topic': settings.news.default_topic})
   elif request.method == "POST":
     form = GenerateNewsForm(request.POST)

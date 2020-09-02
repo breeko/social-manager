@@ -36,32 +36,32 @@ def write_last_run(now: datetime):
   with open(STATUS_PATH, "w") as f:
     f.write(format_date(now))
 
-def process_tweet(tweet: Tweet, debug: bool):
+def process_tweet(tweet: Tweet, now: datetime, debug: bool):
   """ Processes user tweets """
   if not debug:
     api = get_api(tweet.user)
     api.update_status(tweet.body)
-  tweet.sent = timezone.localtime()
+  tweet.sent = now
   tweet.save(update_fields=["sent"])
   logging.info("[%s]: tweeted %s", tweet.user.username, tweet.body)
 
-def process_follow(follow: Follow, debug: bool):
+def process_follow(follow: Follow, now: datetime, debug: bool):
   """ Processes user follows """
   if not debug:
     api = get_api(follow.user)
     if user_exists(api, follow.username):
       api.create_friendship(screen_name=follow.username)
-  follow.followed = timezone.localtime()
+  follow.followed = now
   follow.save(update_fields=['followed'])
   logging.info("[%s]: followed %s", follow.user.username, follow.username)
 
-def process_unfollow(follow: Follow, debug: bool):
+def process_unfollow(follow: Follow, now: datetime, debug: bool):
   """ Processes user unfollows """
   if not debug:
     api = get_api(follow.user)
     if user_exists(api, follow.username):
       api.destroy_friendship(screen_name=follow.username)
-  follow.unfollowed = timezone.localtime()
+  follow.unfollowed = now
   follow.save(update_fields=['unfollowed'])
   logging.info("[%s]: unfollowed %s", follow.user.username, follow.username)
 
@@ -81,10 +81,10 @@ class Command(BaseCommand):
     follow_sleep_until = None
     while True:
       now = timezone.now()
-      write_last_run(timezone.now())
+      write_last_run(timezone.localtime())
       if tweet_sleep_until is None or now > tweet_sleep_until:
         try:
-          handle_tweet(debug)
+          handle_tweet(now, debug)
         except TweepError as err:
           logging.error("Failure to tweet: %s", err)
           tweet_sleep_until = now + timedelta(seconds=settings.scheduler.sleep_failure)
@@ -92,7 +92,7 @@ class Command(BaseCommand):
           continue # database locked
       if follow_sleep_until is None or now > follow_sleep_until:
         try:
-          handle_follow(debug)
+          handle_follow(now, debug)
         except TweepError as err:
           logging.error("Failure to follow: %s", err)
           follow_sleep_until = now + timedelta(seconds=settings.scheduler.sleep_failure)
@@ -101,23 +101,21 @@ class Command(BaseCommand):
 
       sleep(settings.scheduler.sleep)
 
-def handle_tweet(debug: bool):
+def handle_tweet(now: datetime, debug: bool):
   """ Handles user tweets """
-  offset = timezone.timedelta(seconds=settings.scheduler.precision)
-  now = timezone.localtime()
-  start = now
+  offset = timedelta(seconds=settings.scheduler.precision)
+  start = now - offset
   end = now + offset
-  tweets = Tweet.objects.filter(scheduled__gte=start, scheduled__lte=end, sent__isnull=True)
+  tweets = Tweet.objects.filter(scheduled__range=(start, end), sent__isnull=True)
   for tweet in tweets:
-    process_tweet(tweet, debug)
+    process_tweet(tweet, now, debug)
 
-def handle_follow(debug: bool):
+def handle_follow(now: datetime, debug: bool):
   """ Handles user follows """
-  now = timezone.localtime()
   follows = Follow.objects.filter(follow__lte=now, followed__isnull=True)
   unfollows = Follow.objects.filter(unfollow__lte=now, unfollowed__isnull=True)
   for follow in follows:
-    process_follow(follow, debug)
+    process_follow(follow, now, debug)
 
   for unfollow in unfollows:
-    process_unfollow(unfollow, debug)
+    process_unfollow(unfollow, now, debug)

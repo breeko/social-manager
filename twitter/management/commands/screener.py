@@ -103,7 +103,6 @@ class Command(BaseCommand):
     stream_listener = MyStreamListener(out_path=out_path, user_filter=user_filter, api=api, botometer=botometer)
 
     coords = []
-    print(locations)
 
     for location in locations:
       res = geocoder.osm(location).json
@@ -111,7 +110,6 @@ class Command(BaseCommand):
         # [long, lat]
         coord = res['bbox']['southwest'][::-1] + res['bbox']['northeast'][::-1]
         coords.extend(coord)
-    print(coords)
     while True:
       try:
         stream = tweepy.Stream(auth=api.auth, listener=stream_listener)

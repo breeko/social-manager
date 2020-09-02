@@ -1,6 +1,5 @@
 """ follow.py """
-from datetime import datetime, timedelta
-from random import random
+from datetime import timedelta
 
 from django import forms
 from django.db.utils import IntegrityError
@@ -11,14 +10,14 @@ from django.utils import timezone
 
 from twitter.models import Follow, User
 from twitter.settings import settings
-from twitter.utils.date_utils import format_date, read_date
+from twitter.utils.date_utils import format_date, read_date, within_hour
 from twitter.utils.twitter_utils import create_valid_user, get_suggestions
 
 
 def get_unfollow_date():
   if settings.follow.unfollow_default_days is None:
     return None
-  return format_date(timezone.localtime() + timedelta(days=settings.follow.unfollow_default_days))
+  return within_hour(hours=settings.follow.unfollow_default_days)
 
 def follow(request):
   """ form to generate follows """
@@ -67,7 +66,7 @@ def follow(request):
           continue
 
   follow_date = format_date()
-  unfollow_date = get_unfollow_date()
+  unfollow_date = within_hour()
   context = {
     'bulk_form': bulk_form,
     'follow_form': follow_form,
@@ -81,7 +80,11 @@ def follow(request):
 
 class BulkFollowForm(forms.Form):
   users = forms.CharField(label="Users", widget=forms.Textarea(attrs={"rows": 5, "cols": 20}))
-  unfollow = forms.DateField(label="Unfollow", required=False)
+  follow_dt = forms.DateField(label="Follow", required=True, initial=format_date())
+  unfollow_dt = forms.DateField(label="Unfollow", required=False, initial=get_unfollow_date())
+  within_hour = forms.FloatField(
+    label="Within hour", required=True, min_value=0.0, initial=1.0
+  )
 
 BulkFollowFormDefaults = {
   "unfollow": get_unfollow_date()
@@ -104,14 +107,19 @@ FollowTweetFormDefaults = {
 }
 
 def bulk_follow(request):
+  """ Handles bulk follow """
   if request.method == 'POST':
     username = request.POST.get('bulk_username')
     user = User.objects.get(username=username)
-    unfollow = request.POST.get('unfollow')
+    hours = float(request.POST.get('within_hour'))
+
     for u in request.POST.get('users').split("\n"):
       to_follow = u.strip()
-      unfollow_random = read_date(unfollow) + timedelta(hours=random())
-      follow_random = timezone.localtime() + timedelta(hours=random())
+      follow_date = read_date(request.POST.get('follow_dt'))
+      follow_date = within_hour(dt=follow_date, hours=hours)
+      unfollow_date = None if request.POST.get('unfollow_dt') is None else \
+        within_hour(dt=read_date(request.POST.get('unfollow_dt')), hours=hours)
+
       if not Follow.objects.filter(username=to_follow).exists():
-        Follow(username=to_follow, user=user, follow=follow_random, unfollow=unfollow_random).save()
+        Follow(username=to_follow, user=user, follow=follow_date, unfollow=unfollow_date).save()
   return HttpResponseRedirect(reverse('twitter:follow'))

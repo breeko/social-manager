@@ -47,11 +47,10 @@ def reschedule_tweets(request):
   ids = request.POST.getlist("ids[]", [])
   to_reschedule = Tweet.objects.filter(id__in=ids, sent__isnull=True)
   within_hours = request.POST.get("withinHours")
-  print(request.POST)
   hours = float(within_hours)
 
   for tweet in to_reschedule:
-    tweet.scheduled = within_hour(hours)
+    tweet.scheduled = within_hour(hours=hours)
     tweet.save()
   return HttpResponse("{}", content_type='application/json')
 
@@ -67,21 +66,21 @@ def reschedule_follows(request):
   # reschedule follows
   to_reschedule = Follow.objects.filter(id__in=ids, followed__isnull=True)
   within_hours = request.POST.get("withinHours")
-  hours = float(within_hours)
+  hours = float(hours=within_hours)
   for follow in to_reschedule:
-    follow.follow = within_hour(hours)
+    follow.follow = within_hour(hours=hours)
     follow.save()
   # reschedule unfollows
   to_reschedule = Follow.objects.filter(id__in=ids, followed__isnull=False, unfollowed__isnull=True)
   for follow in to_reschedule:
-    follow.unfollow = within_hour(hours)
+    follow.unfollow = within_hour(hours=hours)
     follow.save()
 
   return HttpResponse("{}", content_type='application/json')
 
 class TweetTable(tables.Table):
   tweet_selection = tables.CheckBoxColumn(accessor="pk", attrs={"th__input": {"onclick": "toggle('tweet_selection', this)"}}, orderable=False)
-  edit = tables.LinkColumn('twitter:edit_tweet', text='✏️', args=[A('pk')], orderable=False, empty_values=())
+  _ = tables.LinkColumn('twitter:edit_tweet', text='✏️', args=[A('pk')], orderable=False, empty_values=())
   user = tables.Column(orderable=False)
   body = tables.Column(orderable=False)
   scheduled = tables.Column(orderable=False)
@@ -91,7 +90,7 @@ class TweetTable(tables.Table):
 
 class FollowTable(tables.Table):
   follow_selection = tables.CheckBoxColumn(accessor="pk", attrs={"th__input": {"onclick": "toggle('follow_selection', this)"}}, orderable=False)
-  edit = tables.LinkColumn('twitter:edit_follow', text='✏️', args=[A('pk')], orderable=False, empty_values=())
+  _ = tables.LinkColumn('twitter:edit_follow', text='✏️', args=[A('pk')], orderable=False, empty_values=())
   username = tables.Column(orderable=False)
   follow = tables.Column(orderable=False)
   unfollow = tables.Column(orderable=False)
