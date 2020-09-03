@@ -30,7 +30,7 @@ class Follow(models.Model):
   """ Model for tweet used to store and schedule follows made """
   id = models.AutoField(primary_key=True)
   user = models.ForeignKey(User, on_delete=models.CASCADE)
-  username = models.CharField(max_length=240, null=False, unique=True)
+  username = models.CharField(max_length=240, null=False)
   follow = models.DateTimeField('date to follow', null=True, blank=True)
   unfollow = models.DateTimeField('date to unfollow', null=True, blank=True)
   followed = models.DateTimeField('date did follow', null=True, blank=True)

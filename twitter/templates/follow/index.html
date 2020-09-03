@@ -17,6 +17,8 @@
     {% csrf_token %}
     {{ bulk_form|crispy }}
     <button type="submit" class="btn btn-primary" name="follow">Follow</button>
+    <input type="checkbox" id="exclude_followed" name="exclude_followed" value="exclude" checked>
+    <label for="exclude_followed"> Exclude previously followed</label><br>
   </form>
   <hr/>
   <h3>Find</h3>

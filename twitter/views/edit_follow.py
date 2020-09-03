@@ -11,7 +11,7 @@ from twitter.models import Follow
 
 def edit_follow(request, id: int):
   """ edits a follow """
-  template = loader.get_template('edit/index.html')
+  template = loader.get_template('create/index.html')
   form = EditFollowForm(request.POST)
   instance = Follow.objects.get(id=id)
   if request.method == "POST":
@@ -25,8 +25,8 @@ def edit_follow(request, id: int):
   context = {
     'id': id,
     'form': form,
-    'title': 'Edit Follow',
-    'path': 'twitter:edit_follow'
+    'type': "follow",
+    'title': 'Edit Follow'
   }
   return HttpResponse(template.render(context, request))
 

@@ -2,9 +2,10 @@
 
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.template import loader
 from django.urls import reverse
-from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from twitter.models import Tweet
 
@@ -29,13 +30,16 @@ def create(request, id: int = None):
 
   context = {
     "id": id,
+    "type": "tweet",
     "form": form,
-    "title": "Create" if id is None else "Edit"
+    "title": "Create" if id is None else "Edit",
+    "path": "twitter:create"
   }
   return HttpResponse(template.render(context, request))
 
 class CreateTweetForm(forms.ModelForm):
   """ Form to edit a scheduled tweet """
+  scheduled = forms.DateTimeField(initial=timezone.now())
   class Meta:
     model = Tweet
     fields = ("user", "body", "scheduled",)
