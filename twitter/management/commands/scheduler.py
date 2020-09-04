@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime, timedelta
-from sqlite3 import OperationalError
+from django.db.utils import OperationalError
 from time import sleep
 
 from django.core.management.base import BaseCommand

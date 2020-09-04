@@ -114,7 +114,7 @@ class Command(BaseCommand):
       try:
         stream = tweepy.Stream(auth=api.auth, listener=stream_listener)
         stream.filter(locations=coords)
-      except ProtocolError:
+      except (ProtocolError, tweepy.error.TweepError):
         continue
       except (KeyboardInterrupt, SystemExit):
         return
