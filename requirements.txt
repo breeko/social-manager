@@ -4,6 +4,8 @@ botometer==1.5
 certifi==2020.6.20
 chardet==3.0.4
 click==7.1.2
+cron-descriptor==1.2.24
+croniter==0.3.34
 decorator==4.4.2
 Django==3.1
 django-apscheduler==0.4.0
@@ -17,6 +19,7 @@ isort==4.3.21
 lazy-object-proxy==1.4.3
 lxml==4.5.2
 mccabe==0.6.1
+natsort==7.0.1
 newscatcher==0.2.0
 oauthlib==3.1.0
 pylint==2.5.3
@@ -24,6 +27,7 @@ pylint-django==2.3.0
 pylint-plugin-utils==0.6
 pyparsing==2.4.7
 PySocks==1.7.1
+python-dateutil==2.8.1
 python-dotenv==0.14.0
 pytz==2020.1
 ratelim==0.1.6
