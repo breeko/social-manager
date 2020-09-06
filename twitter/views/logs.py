@@ -18,7 +18,7 @@ def logs(request):
   logs_ = []
   if os.path.exists(LOGGING_PATH):
     with open(LOGGING_PATH) as f:
-      logs_ = f.readlines()[::-1]
+      logs_ = f.readlines()[:-100:-1]
 
   context = {
     'title': "Logs",

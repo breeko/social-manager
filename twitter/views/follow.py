@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from twitter.models import Follow, User
 from twitter.settings import settings
-from twitter.utils.date_utils import read_date, within_hour
+from twitter.utils.date_utils import read_date, randomize_date
 from twitter.utils.twitter_utils import create_valid_user, get_suggestions
 
 
@@ -107,9 +107,9 @@ def bulk_follow(request):
     for u in request.POST.get('users').split("\n"):
       to_follow = u.strip()
       follow_date = read_date(request.POST.get('follow_dt'))
-      follow_date = within_hour(dt=follow_date, hours=hours)
+      follow_date = randomize_date(dt=follow_date, hours=hours)
       unfollow_date = None if request.POST.get('unfollow_dt') is None else \
-        within_hour(dt=read_date(request.POST.get('unfollow_dt')), hours=hours)
+        randomize_date(dt=read_date(request.POST.get('unfollow_dt')), hours=hours)
 
       if not Follow.objects.filter(username=to_follow).exists():
         Follow(username=to_follow, user=user, follow=follow_date, unfollow=unfollow_date).save()

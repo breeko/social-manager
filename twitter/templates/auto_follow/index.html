@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block javascript %}
+  <script>
+    const updateCrontabDescription = () => {
+      const value = $('#id_schedule').val()
+      $.ajax({
+          type: "POST",
+          url: "/twitter/parse_crontab",
+          data: { value },
+          success: (d) => {
+            document.getElementById("parsed_crontab").innerText = d
+          }
+        })
+      }
+    $(document).ready(() => {
+      updateCrontabDescription()
+      $('#id_schedule').on('input', updateCrontabDescription)
+    })
+  </script>
+{% endblock %}
+
+{% block content %}
+  {% if id == None %}
+    <form action="{% url 'twitter:auto_follow' %}" method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <div id="parsed_crontab"></div>
+      <br/>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  {% else %}
+    <form action="{% url 'twitter:edit_auto_follow' id=id %}" method="post">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <div id="parsed_crontab"></div>
+      <br/>      
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  {% endif %}
+{% endblock %}

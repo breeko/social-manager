@@ -1,17 +1,22 @@
 """ tweetscheduler.py """
 
+import csv
 import logging
 from datetime import datetime, timedelta
-from django.db.utils import OperationalError
 from time import sleep
+from typing import List
 
+import pytz
+from croniter import croniter
 from django.core.management.base import BaseCommand
+from django.db.utils import OperationalError
 from django.utils import timezone
 from tweepy.error import TweepError
 
-from twitter.models import Follow, Tweet
+from social.settings import TIME_ZONE
+from twitter.models import AutoFollow, Follow, Tweet
 from twitter.settings import settings
-from twitter.utils.date_utils import format_date
+from twitter.utils.date_utils import format_date, randomize_date
 from twitter.utils.twitter_utils import get_api
 
 LOGGING_PATH = "logs/scheduler/scheduler.log"
@@ -65,6 +70,47 @@ def process_unfollow(follow: Follow, now: datetime, debug: bool):
   follow.save(update_fields=['unfollowed'])
   logging.info("[%s]: unfollowed %s", follow.user.username, follow.username)
 
+def get_follows(auto_follow: AutoFollow) -> List[Follow]:
+  """ Returns list of follows based on AutoFollow """
+  already_followed = {f.username for f in Follow.objects.all()}
+  follows = []
+  cur_ct = 0
+  with open(auto_follow.path, "r") as csv_file:
+    csv_reader = csv.DictReader(csv_file)
+    for row in csv_reader:
+      name = row.get("screen_name")
+      friend_follower_overlap = row.get("friend_follower_overlap")
+      if name is None or friend_follower_overlap is None or cur_ct >= auto_follow.count:
+        break
+      if float(friend_follower_overlap) >= auto_follow.min_friend_follower_overlap and \
+        name not in already_followed:
+        follow_date = randomize_date(hours=auto_follow.over_hours)
+        unfollow_date = None
+        if auto_follow.unfollow_days is not None:
+          unfollow_date = randomize_date(hours=auto_follow.unfollow_days) + \
+            timedelta(days=settings.follow.unfollow_default_days)
+        follow = Follow(user=auto_follow.user, username=name, follow=follow_date, unfollow=unfollow_date)
+        follows.append(follow)
+        already_followed.add(name)
+        cur_ct += 1
+  return follows
+
+def should_run(schedule: str, now: datetime):
+  """ Returns boolean indicating whether schedule has elapsed since last sleep """
+  tz = pytz.timezone(TIME_ZONE)
+  local_date = tz.localize(datetime.now()) - timedelta(seconds=settings.scheduler.sleep)
+  next_date = croniter(schedule, local_date).get_next(datetime)
+  return next_date <= now
+
+def process_auto_follow(now: datetime, debug: bool):
+  """ Collects all auto-follows and creates follow objects"""
+  auto_follows = [af for af in AutoFollow.objects.all() if should_run(af.schedule, now)]
+  for af in auto_follows:
+    to_follow = get_follows(af)
+    # if not debug:
+    Follow.objects.bulk_create(to_follow)
+    logging.info("[%s]: auto-followed %s acounts", af.user.username, len(to_follow))
+
 class Command(BaseCommand):
   """ Runs tweet schedule """
   help = """Runs tweet schedule. You can set settings in settings.py """
@@ -82,6 +128,11 @@ class Command(BaseCommand):
     while True:
       now = timezone.now()
       write_last_run(timezone.localtime())
+      try:
+        process_auto_follow(now, debug)
+      except Exception as e:
+        logging.error("Failure to auto: %s", e)
+
       if tweet_sleep_until is None or now > tweet_sleep_until:
         try:
           handle_tweet(now, debug)

@@ -4,7 +4,6 @@ from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from django.utils.html import mark_safe
 
 from twitter.models import Follow
 
@@ -34,11 +33,10 @@ class EditFollowForm(forms.ModelForm):
   """ Form to edit a scheduled tweet """
   def __init__(self, *args, **kwargs):
     super(EditFollowForm, self).__init__(*args, **kwargs)
-    readonly_fields = [ 'followed', 'unfollowed']
+    readonly_fields = ['followed', 'unfollowed']
     for field in readonly_fields:
       self.fields[field].widget.attrs['readonly'] = True
 
   class Meta:
     model = Follow
     fields = ('user', 'username', 'follow', 'unfollow', 'followed', 'unfollowed',)
-

@@ -2,7 +2,7 @@
 
 {% load render_table from django_tables2 %}
 
-{% block javascript %}	
+{% block javascript %}
   <script>
     const createOnClick = ({id, table, url}) => {
       $(`#${id}`).click(() => {
@@ -32,13 +32,13 @@
       createOnClick({id: "reschedule_follow", table: "follow_table", url: "follow/reschedule"});
       createOnClick({id: "delete_tweet", table: "tweet_table", url: "tweet/delete"});
       createOnClick({id: "reschedule_tweet", table: "tweet_table", url: "tweet/reschedule"});
+      createOnClick({id: "delete_auto_follow", table: "auto_follow_table", url: "auto_follow/delete"});
     })
   </script>	
 {% endblock %}
 
 {% block content %}
   <h3>Tweets</h3>
-  
   {% render_table tweets_table %}
   <button id="delete_tweet" class="btn btn-danger">Delete</button>
   <button id="reschedule_tweet" class="btn">Reschedule</button>
@@ -52,5 +52,9 @@
   <span>Within hours:</span>
   <input id="reschedule_follow_hours" value="1.00" type="number" step="0.01">
   <hr/>
-{% endblock %}
+  <h3>Auto Follows</h3>
+  {% render_table auto_follows_table %}
+  <button id="delete_auto_follow" class="btn btn-danger">Delete</button>
+  <hr/>
+  {% endblock %}
 

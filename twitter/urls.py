@@ -8,6 +8,8 @@ urlpatterns = [
     path('manage', manage, name='manage'),
     path('create', create, name='create'),
     path('follow', follow, name='follow'),
+    path('auto_follow', auto_follow, name='auto_follow'),
+    path('parse_crontab', parse_crontab, name='parse_crontab'),
     path('news', news, name='news'),
     path('logs', logs, name='logs'),
     path(r'tweet/follow/bulk', bulk_follow, name='bulk_follow'),
@@ -18,4 +20,6 @@ urlpatterns = [
     path(r'follow/edit/<int:id>', edit_follow, name='edit_follow'),
     path(r'user/edit/<int:id>', user, name='edit_user'),
     path(r'tweet/reschedule', reschedule_tweets, name='reschedule_tweets'),
+    path(r'auto_follow/edit/<int:id>', auto_follow, name='edit_auto_follow'),
+    path(r'auto_follow/delete', delete_auto_follows, name='delete_auto_follows'),
 ]

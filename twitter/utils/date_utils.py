@@ -15,6 +15,6 @@ def read_date(date: str) -> 'datetime':
   """ Converts a string to a date """
   return timezone.make_aware(dateparse.parse_datetime(date))
 
-def within_hour(dt: datetime = timezone.now(), hours: float = 1.0) -> 'datetime':
+def randomize_date(dt: datetime = timezone.now(), hours: float = 1.0) -> 'datetime':
   """ Returns a datetime object that's within in the next hour """
   return dt + timedelta(hours=random() * hours)

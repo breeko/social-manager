@@ -21,10 +21,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 if os.path.exists('secrets.json'):
-   # read secrets from json file
-   import json
-   with open('secrets.json') as f:
-       SECRET_KEY = json.loads(f.read())['SECRET_KEY']
+    # read secrets from json file
+    import json
+    with open('secrets.json') as f:
+        SECRET_KEY = json.loads(f.read())['SECRET_KEY']
 else:
     SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
@@ -100,7 +100,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'EST5EDT'
+TIME_ZONE = 'US/Eastern'
 
 USE_I18N = True
 
