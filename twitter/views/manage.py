@@ -28,8 +28,8 @@ def manage(request):
   tweets_table = TweetTable(tweets)
   follows = Follow.objects.filter(unfollowed__isnull=True).order_by("follow")
   auto_follows = AutoFollow.objects.all()
-  follows_table = FollowTable(follows).paginate(page=request.GET.get("page", 1), per_page=10)
-  auto_follows_table = AutoFollowTable(auto_follows).paginate(page=request.GET.get("page", 1), per_page=10)
+  follows_table = FollowTable(follows).paginate(page=request.GET.get("fp", 1), per_page=10)
+  auto_follows_table = AutoFollowTable(auto_follows).paginate(page=request.GET.get("afp", 1), per_page=10)
 
   context = {
     'tweets_table': tweets_table,
@@ -109,6 +109,7 @@ class FollowTable(tables.Table):
   unfollowed = tables.Column(orderable=False)
 
   class Meta:
+    page_field = "fp"
     attrs = {"id": "follow_table"}
 
 class AutoFollowTable(tables.Table):
@@ -125,4 +126,5 @@ class AutoFollowTable(tables.Table):
     return ExpressionDescriptor(value, throw_exception_on_parse_error=False)
 
   class Meta:
+    page_field = "afp"
     attrs = {"id": "auto_follow_table"}
