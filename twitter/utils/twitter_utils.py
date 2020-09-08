@@ -2,7 +2,6 @@
 from typing import Callable, List
 
 import tweepy
-from botometer import Botometer
 from tweepy.api import API
 
 from twitter.utils.parse_utils import build_expr
@@ -13,19 +12,6 @@ def get_api(user: 'User') -> API:
   auth.set_access_token(user.api_access_token, user.api_token_secret)
   api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True, compression=True)
   return api
-
-def get_botometer(user: 'User') -> Botometer:
-  """ Returns an api object based on user credentials """
-  if user.rapidapi_key is None:
-    return None
-  botometer = Botometer(
-    consumer_key=user.api_key,
-    consumer_secret=user.api_secret,
-    access_token=user.api_access_token,
-    access_token_secret=user.api_token_secret,
-    rapidapi_key=user.rapidapi_key
-  )
-  return botometer
 
 def get_trends(user: 'User', geo_code: int = 23424977) -> List[str]:
   """ Returns trends in a given geo-code (default US) """

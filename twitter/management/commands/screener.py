@@ -9,17 +9,16 @@ from django.core.management.base import BaseCommand
 from urllib3.exceptions import ProtocolError
 
 from twitter.models import User
-from twitter.utils.twitter_utils import get_api, get_botometer
+from twitter.utils.twitter_utils import get_api
 
 from .screener_utils import column_orderings, flatten_dict, get_overlap
 
 UserFilter = namedtuple("UserFilter", "min_friends max_friends min_followers max_followers")
 
 class MyStreamListener(tweepy.StreamListener):
-  def __init__(self, out_path, user_filter: UserFilter, api, botometer):
+  def __init__(self, out_path, user_filter: UserFilter, api):
     super().__init__(api)
     self._seen = set()
-    self.botometer = botometer
     self.out_path = out_path
     self.user_filter = user_filter
     if os.path.exists(out_path):
@@ -31,25 +30,7 @@ class MyStreamListener(tweepy.StreamListener):
     else:
       with open(out_path, "w") as csv_file:
         writer = csv.writer(csv_file)
-        # botometer score of 0 means real, 1 is bot
-        writer.writerow([
-          "name", "friend_follower_overlap", "boto_english", "boto_universal",
-          "boto_content", "boto_friend", "boto_network", "boto_sentiment", "boto_temporal", "boto_user"
-        ] + column_orderings)
-
-  def _get_boto_results(self, username: str):
-    if self.botometer is None:
-      return [""] * 8
-    results = self.botometer.check_account(username)
-    english = results["cap"]["english"]
-    universal = results["cap"]["universal"]
-    content = results["categories"]["content"]
-    friend = results["categories"]["friend"]
-    network = results["categories"]["network"]
-    sentiment = results["categories"]["sentiment"]
-    temporal = results["categories"]["temporal"]
-    user = results["categories"]["user"]
-    return [english, universal, content, friend, network, sentiment, temporal, user]
+        writer.writerow(["name", "friend_follower_overlap"] + column_orderings)
 
   def on_status(self, status):
     name = status.user.screen_name
@@ -62,10 +43,9 @@ class MyStreamListener(tweepy.StreamListener):
       user = self.api.get_user(name)
       with open(self.out_path, "a+") as csv_file:
         writer = csv.writer(csv_file)
-        boto_results = self._get_boto_results(user.screen_name)
         user_d = flatten_dict(user._json)
         user_results = [user_d.get(column, "N/A") for column in column_orderings]
-        row = [name, overlap] + boto_results + user_results
+        row = [name, overlap] + user_results
         writer.writerow(row)
       self._seen.add(name)
 
@@ -99,8 +79,7 @@ class Command(BaseCommand):
     )
     user = User.objects.get(username=username)
     api = get_api(user)
-    botometer = get_botometer(user)
-    stream_listener = MyStreamListener(out_path=out_path, user_filter=user_filter, api=api, botometer=botometer)
+    stream_listener = MyStreamListener(out_path=out_path, user_filter=user_filter, api=api)
 
     coords = []
 

@@ -1,6 +1,5 @@
 """ user.py """
 import tweepy
-from botometer import Botometer
 from django import forms
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -38,12 +37,11 @@ def user(request, id: int = None):
 class NewUserForm(forms.ModelForm):
   """ Form to create a new user"""
   def __init__(self, *args, **kwargs):
-        super(NewUserForm, self).__init__(*args, **kwargs)
-        self.fields['rapidapi_key'].required = False
+    super(NewUserForm, self).__init__(*args, **kwargs)
 
   class Meta:
     model = User
-    fields = ('username', 'api_key', 'api_secret', 'api_access_token', 'api_token_secret', 'rapidapi_key')
+    fields = ('username', 'api_key', 'api_secret', 'api_access_token', 'api_token_secret')
 
 def login_error(form: NewUserForm) -> str:
   """ Checks whether user has valid login """
@@ -56,17 +54,4 @@ def login_error(form: NewUserForm) -> str:
   api = tweepy.API(auth)
   if not api.verify_credentials():
     return "Invalid twitter credentials"
-  rapidapi_key = form.data.get("rapidapi_key")
-  if rapidapi_key:
-    botometer = Botometer(
-      consumer_key=api_key,
-      consumer_secret=api_secret,
-      access_token=api_access_token,
-      access_token_secret=api_token_secret,
-      rapidapi_key=rapidapi_key
-    )
-    try:
-      botometer.check_account('@realDonaldTrump')
-    except HTTPError:
-      return "invalid rapidapi_key"
   return ""

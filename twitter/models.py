@@ -50,7 +50,6 @@ class User(models.Model):
   api_secret = models.CharField(max_length=80, unique=True, null=False)
   api_access_token = models.CharField(max_length=80, unique=True, null=False)
   api_token_secret = models.CharField(max_length=80, unique=True, null=False)
-  rapidapi_key = models.CharField(max_length=80, unique=False, null=True)
 
   def __str__(self):
     return self.username
